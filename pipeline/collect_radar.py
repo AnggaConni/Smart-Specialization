@@ -131,7 +131,11 @@ def safe_date(value: Any) -> str | None:
         return None
     text = str(value)[:10]
     try:
-        return date.fromisoformat(text).isoformat()
+        parsed = date.fromisoformat(text)
+        # Guard against malformed/future bibliographic dates (e.g. year 2121).
+        if parsed.year < 1800 or parsed.year > date.today().year + 1:
+            return None
+        return parsed.isoformat()
     except ValueError:
         return None
 
@@ -143,6 +147,8 @@ def publication_date_from_crossref(item: dict[str, Any]) -> str | None:
             pieces = part[0]
             try:
                 year = int(pieces[0])
+                if year < 1800 or year > date.today().year + 1:
+                    continue
                 month = int(pieces[1]) if len(pieces) > 1 else 1
                 day = int(pieces[2]) if len(pieces) > 2 else 1
                 return date(year, month, day).isoformat()
@@ -432,17 +438,20 @@ def comtrade_years() -> list[int]:
     return list(range(start_year, end_year + 1))
 
 
+COMTRADE_KEY_REJECTED = False
+
+
 def fetch_comtrade_rows(
     session: requests.Session, reporter_code: int, year: int, api_key: str,
     max_records: int, product_codes: list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], str]:
-    headers = {"Ocp-Apim-Subscription-Key": api_key} if api_key else None
-    url = "https://comtradeapi.un.org/data/v1/get/C/A/HS" if api_key else "https://comtradeapi.un.org/public/v1/preview/C/A/HS"
+    global COMTRADE_KEY_REJECTED
+    use_auth = bool(api_key) and not COMTRADE_KEY_REJECTED
     params: dict[str, Any] = {
         "reporterCode": reporter_code,
         "flowCode": "M",
         "period": year,
-        "maxrecords": max_records if api_key else min(max_records, 500),
+        "maxrecords": max_records if use_auth else min(max_records, 500),
         "includeDesc": "true",
     }
     if product_codes:
@@ -450,11 +459,35 @@ def fetch_comtrade_rows(
         # Leave partnerCode unset to retrieve partner-level import observations.
     else:
         params["partnerCode"] = 0
-    payload = request_json(session, url, params=params, headers=headers, timeout=60)
+    if use_auth:
+        try:
+            payload = request_json(
+                session, "https://comtradeapi.un.org/data/v1/get/C/A/HS",
+                params=params, headers={"Ocp-Apim-Subscription-Key": api_key}, timeout=60,
+            )
+            mode = "live"
+        except requests.HTTPError as exc:
+            status_code = exc.response.status_code if exc.response is not None else None
+            if status_code not in (401, 403):
+                raise
+            # A stale/invalid stored key should not disable all trade collection.
+            COMTRADE_KEY_REJECTED = True
+            LOG.warning("Configured UN Comtrade key was rejected (HTTP %s); falling back to public preview.", status_code)
+            payload = request_json(
+                session, "https://comtradeapi.un.org/public/v1/preview/C/A/HS",
+                params=params, headers=None, timeout=60,
+            )
+            mode = "preview-limited"
+    else:
+        payload = request_json(
+            session, "https://comtradeapi.un.org/public/v1/preview/C/A/HS",
+            params=params, headers=None, timeout=60,
+        )
+        mode = "preview-limited"
     rows = payload.get("data", []) if isinstance(payload, dict) else []
     if not isinstance(rows, list):
         raise RuntimeError(f"Unexpected UN Comtrade response for reporter {reporter_code}, year {year}")
-    return rows, "live" if api_key else "preview-limited"
+    return rows, mode
 
 
 def classification_rank(row: dict[str, Any]) -> int:
@@ -574,6 +607,8 @@ def build_trade_flows(
 def fetch_trade(
     session: requests.Session, config: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], list[str]]:
+    global COMTRADE_KEY_REJECTED
+    COMTRADE_KEY_REJECTED = False
     api_key = os.getenv("UN_COMTRADE_API_KEY", "").strip() or os.getenv("COMTRADE_API_KEY", "").strip()
     status: dict[str, Any] = {
         "name": "UN Comtrade", "url": COMTRADE_SOURCE,
@@ -607,6 +642,11 @@ def fetch_trade(
             for year in years:
                 try:
                     rows, mode = fetch_comtrade_rows(session, reporters[iso]["code"], year, api_key, max_records)
+                    if mode != "live":
+                        if api_key and COMTRADE_KEY_REJECTED:
+                            status["api_key_auth"] = "rejected; public preview used"
+                        api_key = ""
+                        status["mode"] = "preview-limited"
                     raw_by_market_year[(iso, year)] = rows
                     successful_requests += 1
                     status["status"] = "ok"
@@ -636,10 +676,15 @@ def fetch_trade(
             if not targets or latest_year is None:
                 continue
             try:
-                partner_rows, _ = fetch_comtrade_rows(
+                partner_rows, flow_mode = fetch_comtrade_rows(
                     session, reporters[iso]["code"], int(latest_year), api_key, flow_max_records,
                     [row["product_code"] for row in targets],
                 )
+                if flow_mode != "live":
+                    if api_key and COMTRADE_KEY_REJECTED:
+                        status["api_key_auth"] = "rejected; public preview used"
+                    api_key = ""
+                    status["mode"] = "preview-limited"
                 status["flow_requests_ok"] += 1
                 allowed = {row["product_code"] for row in targets}
                 for flow in build_trade_flows(partner_rows, iso, reporters[iso]["name"], int(latest_year), code_to_iso):
