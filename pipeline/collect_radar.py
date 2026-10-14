@@ -39,6 +39,7 @@ CROSSREF_URL = "https://api.crossref.org/works"
 COMTRADE_REPORTERS_URL = "https://comtradeapi.un.org/files/v1/app/reference/Reporters.json"
 WB_BASE = "https://api.worldbank.org/v2"
 COMTRADE_SOURCE = "https://comtradeplus.un.org/"
+GDELT_DOC_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
 WB_INDICATORS = {
     "gdp_usd": "NY.GDP.MKTP.CD",
     "gdp_per_capita_usd": "NY.GDP.PCAP.CD",
@@ -718,6 +719,130 @@ def fetch_trade(
         return [], [], status, warnings
 
 
+
+
+def gdelt_date(value: Any) -> str | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    for fmt in ("%Y%m%dT%H%M%SZ", "%Y%m%d%H%M%S", "%Y-%m-%dT%H:%M:%SZ"):
+        try:
+            return datetime.strptime(raw, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return safe_date(raw)
+
+
+def gdelt_url_key(value: str) -> str:
+    from urllib.parse import urlsplit, urlunsplit
+    try:
+        parts = urlsplit(value.strip())
+        if parts.scheme not in ("http", "https") or not parts.netloc:
+            return ""
+        return urlunsplit((parts.scheme.lower(), parts.netloc.lower(), parts.path.rstrip("/"), parts.query, ""))
+    except ValueError:
+        return ""
+
+
+def fetch_gdelt_news(
+    session: requests.Session, config: dict[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, Any], list[str]]:
+    """Discover source-linked news leads from GDELT DOC 2.0; never treat them as verified facts."""
+    warnings: list[str] = []
+    queries = config.get("news_queries", [])
+    status: dict[str, Any] = {
+        "name": "GDELT DOC 2.0",
+        "url": "https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/",
+        "endpoint": GDELT_DOC_URL,
+        "status": "error",
+        "queries_requested": len(queries),
+        "queries_ok": 0,
+        "records": 0,
+        "window": "7 days",
+        "authentication": "No API key required",
+    }
+    combined: dict[str, dict[str, Any]] = {}
+    for topic in queries:
+        query = clean_text(topic.get("query"), 500)
+        if not query:
+            continue
+        try:
+            payload = request_json(
+                session,
+                GDELT_DOC_URL,
+                params={
+                    "query": query,
+                    "mode": "ArtList",
+                    "format": "json",
+                    "maxrecords": min(50, max(1, int(config.get("gdelt_max_records_per_query", 30)))),
+                    "timespan": "7d",
+                    "sort": "HybridRel",
+                },
+                timeout=35,
+            )
+            articles = payload.get("articles", []) if isinstance(payload, dict) else []
+            if not isinstance(articles, list):
+                raise RuntimeError("Unexpected GDELT response shape: 'articles' is not a list")
+            status["queries_ok"] += 1
+            for article in articles:
+                title = clean_text(article.get("title"), 500)
+                url = gdelt_url_key(str(article.get("url") or ""))
+                if not title or not url:
+                    continue
+                published = gdelt_date(article.get("seendate") or article.get("date"))
+                source_country = clean_text(article.get("sourcecountry"), 100)
+                record_id = key_id({"title": title, "url": url})
+                sector = clean_text(topic.get("sector") or "Emerging Signals", 100)
+                existing = combined.get(url)
+                if existing is None:
+                    combined[url] = {
+                        "id": "news-" + record_id,
+                        "title": title,
+                        "url": url,
+                        "publisher_domain": clean_text(article.get("domain"), 180),
+                        "publication_date": published,
+                        "language": clean_text(article.get("language"), 50),
+                        "source_country": source_country,
+                        "sectors": [sector],
+                        "matched_queries": [query],
+                        "data_source": "GDELT DOC 2.0",
+                        "source_url": "https://www.gdeltproject.org/",
+                        "record_type": "news-lead",
+                        "summary": "",
+                        "evidence_note": "Discovery lead only. Open and verify the publisher's original page before using it as evidence.",
+                    }
+                else:
+                    existing["sectors"] = list(dict.fromkeys(existing["sectors"] + [sector]))
+                    existing["matched_queries"] = list(dict.fromkeys(existing["matched_queries"] + [query]))
+                    if not existing.get("source_country") and source_country:
+                        existing["source_country"] = source_country
+                    if not existing.get("publication_date") and published:
+                        existing["publication_date"] = published
+            time.sleep(max(0.25, float(config.get("gdelt_pause_seconds", 0.6))))
+        except (requests.RequestException, ValueError, TypeError, RuntimeError) as exc:
+            warnings.append(f"GDELT query '{query}' failed: {exc}")
+            LOG.warning("GDELT query failed (%s): %s", query, exc)
+
+    today = date.today()
+    news = list(combined.values())
+    for item in news:
+        published = safe_date(item.get("publication_date"))
+        age = (today - date.fromisoformat(published)).days if published else 999
+        # This is a freshness/relevance triage value, not a truth or impact score.
+        item["freshness_score"] = max(0, 100 - min(100, age * 4)) if published else 0
+        item["publication_date"] = published
+    news.sort(key=lambda item: (item.get("publication_date") or "", item.get("freshness_score") or 0), reverse=True)
+    news = news[:500]
+    status["records"] = len(news)
+    if status["queries_ok"] == 0 and queries:
+        status["status"] = "error"
+    elif warnings:
+        status["status"] = "partial"
+    else:
+        status["status"] = "ok"
+    return news, status, warnings
+
+
 def load_previous() -> dict[str, Any]:
     try:
         if OUTPUT.exists():
@@ -753,8 +878,10 @@ def main() -> int:
     warnings.extend(wb_warnings)
     products, flows, trade_status, trade_warnings = fetch_trade(session, config)
     warnings.extend(trade_warnings)
+    news, gdelt_status, gdelt_warnings = fetch_gdelt_news(session, config)
+    warnings.extend(gdelt_warnings)
 
-    sources_ok = any(item.get("status") in {"ok", "partial", "preview-limited"} for item in [research_status["openalex"], research_status["crossref"], wb_status, trade_status])
+    sources_ok = any(item.get("status") in {"ok", "partial", "preview-limited"} for item in [research_status["openalex"], research_status["crossref"], wb_status, trade_status, gdelt_status])
     if not signals and previous.get("signals"):
         signals = previous["signals"]
         warnings.append("Research providers returned no new records; the previous signals snapshot was retained.")
@@ -772,6 +899,10 @@ def main() -> int:
     if not flows and previous.get("trade_flows"):
         flows = previous["trade_flows"]
         warnings.append("Bilateral trade flow refresh failed or returned no rows; the previous flow snapshot was retained.")
+    if gdelt_status["status"] == "error" and previous.get("news_signals"):
+        news = previous["news_signals"]
+        warnings.append("GDELT refresh failed; the previous news snapshot was retained.")
+        gdelt_status["status"] = "stale-fallback"
     if not sources_ok and not previous:
         raise RuntimeError("All data providers failed and no previous snapshot exists; refusing to publish an empty snapshot.")
 
@@ -822,24 +953,27 @@ def main() -> int:
                 research_status["crossref"],
                 wb_status,
                 trade_status,
+                gdelt_status,
             ],
             "warnings": all_errors,
             "counts": {
                 "signals": signal_source_count,
                 "trade_products": len(products),
                 "trade_flows": len(flows),
+                "news_signals": len(news),
                 "mapped_countries": sum(1 for item in countries.values() if item.get("latitude") is not None and item.get("longitude") is not None),
             },
         },
         "signals": signals,
         "trade_products": products,
         "trade_flows": flows,
+        "news_signals": news,
         "countries": sorted(countries.values(), key=lambda item: item.get("name") or item.get("iso3") or ""),
     }
     atomic_write(payload)
     LOG.info(
-        "Wrote radar snapshot: %d signals, %d trade products, %d flows, %d countries; status=%s",
-        len(signals), len(products), len(flows), len(countries), overall_status,
+        "Wrote radar snapshot: %d research signals, %d trade products, %d flows, %d news leads, %d countries; status=%s",
+        len(signals), len(products), len(flows), len(news), len(countries), overall_status,
     )
     return 0
 
