@@ -55,6 +55,20 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("./radar.js", self.parser.external_scripts)
         self.assertIn("./data/radar-data.json", (ROOT / "radar.js").read_text(encoding="utf-8"))
 
+    def test_map_initializes_before_optional_carto_config(self):
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        init = js[js.index("function initialiseMap()"):js.index("function rebuildMarketFilter()")]
+        self.assertIn('L.tileLayer(osmTileUrl()', init)
+        self.assertIn('state.markers=L.layerGroup().addTo(state.map)', init)
+        self.assertIn('state.flowLayer=L.layerGroup().addTo(state.map)', init)
+        self.assertIn('loadMapConfig().then(function()', init)
+        self.assertNotIn('await loadMapConfig()', init)
+
+    def test_map_has_tile_error_fallback(self):
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn("function useOsmFallback(message)", js)
+        self.assertIn("CARTO key was rejected; OpenStreetMap fallback active", js)
+
 
 if __name__ == "__main__":
     unittest.main()
