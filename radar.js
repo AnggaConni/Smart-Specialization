@@ -197,7 +197,7 @@ function policyIndicatorLabel(key){return {gdp_usd:"GDP, current US$",gdp_per_ca
 function policyIndicatorValue(key,item){var val=finite(item&&item.value);if(val===null)return "Not available in snapshot";if(key==="population")return fmtNumber(val);if(key==="trade_pct_gdp")return val.toFixed(1)+"%";return fmtMoney(val)}
 function renderPolicyControls(){
  var select=$("policyCountry");if(!select)return;
- var old=select.value||state.selectedCountry||"",list=state.countries.slice().sort(function(a,b){return String(a.name||a.iso3).localeCompare(String(b.name||b.iso3))});
+ var old=select.value||"",list=state.countries.slice().sort(function(a,b){return String(a.name||a.iso3).localeCompare(String(b.name||b.iso3))});
  select.innerHTML=list.map(function(c){return '<option value="'+escapeHtml(c.iso3)+'">'+escapeHtml(c.name||c.iso3)+' ('+escapeHtml(c.iso3)+')</option>'}).join("");
  if(list.some(function(c){return c.iso3===old}))select.value=old;
  else if(list.some(function(c){return c.iso3==="IDN"}))select.value="IDN";
