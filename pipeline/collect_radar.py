@@ -650,7 +650,7 @@ def fetch_trade(
         if unresolved:
             warnings.append("UN Comtrade reporter codes not resolved for: " + ", ".join(unresolved))
         raw_by_market_year: dict[tuple[str, int], list[dict[str, Any]]] = {}
-        pause = max(0.0, float(os.getenv("S3_REQUEST_SLEEP_SECONDS", "0.15" if api_key else "0.7")))
+        pause = max(0.0, float(os.getenv("S3_REQUEST_SLEEP_SECONDS", "1.15" if not api_key else "0.2")))
         max_records = int(os.getenv("S3_COMTRADE_MAX_RECORDS", "12000" if api_key else "500"))
         successful_requests = 0
         for iso in selected:
@@ -662,6 +662,8 @@ def fetch_trade(
                             status["api_key_auth"] = "rejected; public preview used"
                         api_key = ""
                         status["mode"] = "preview-limited"
+                        # The unauthenticated preview endpoint is more restrictive; keep at least one second between requests.
+                        pause = max(pause, 1.15)
                     raw_by_market_year[(iso, year)] = rows
                     successful_requests += 1
                     status["status"] = "ok"
@@ -700,6 +702,7 @@ def fetch_trade(
                         status["api_key_auth"] = "rejected; public preview used"
                     api_key = ""
                     status["mode"] = "preview-limited"
+                    pause = max(pause, 1.15)
                 status["flow_requests_ok"] += 1
                 allowed = {row["product_code"] for row in targets}
                 for flow in build_trade_flows(partner_rows, iso, reporters[iso]["name"], int(latest_year), code_to_iso):
