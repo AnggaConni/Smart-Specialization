@@ -951,7 +951,7 @@ def main() -> int:
                 "World Bank coordinates are capital/reference points, not precise production or trade locations.",
                 "Scores are exploratory triage aids and should not be read as investment recommendations.",
                 "GDELT records are news discovery leads only; original publisher pages must be checked and claims corroborated before interpretation.",
-                "Subnational polygons loaded from geoBoundaries describe administrative geometry; they do not supply province/district economic indicators.";
+                "Subnational polygons loaded from geoBoundaries describe administrative geometry; they do not supply province/district economic indicators.",
             ],
             "sources": [
                 research_status["openalex"],
