@@ -70,6 +70,21 @@ Open http://localhost:8080. For the dashboard to display current data, run pytho
 - .github/workflows/refresh-radar.yml — weekly/manual collection and snapshot publishing.
 - .github/workflows/ci.yml — unit tests, DOM integration checks, JavaScript syntax checks, and JSON validation.
 
+## Additional free/open API candidates for expanding S³
+
+These are candidates for later integration. Review each provider's current terms, attribution rules, coverage, and rate limits before scheduling a collector.
+
+- **Subnational boundaries — [World Bank Official Boundaries](https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries):** public Admin 0, Admin 1, and Admin 2 boundary files in formats including GeoJSON, with CC BY 4.0 licensing. This can add province/district shapes to the map; it does not itself provide local GDP or specialization indicators. Cite the boundary source and check any display requirements. [Dataset and license](https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries).
+- **Alternative administrative polygons — [geoBoundaries API](https://www.geoboundaries.org/api.html):** machine-readable metadata and simplified GeoJSON for ADM0–ADM5. The `gbOpen` release is CC BY 4.0 with attribution; endpoint availability is not guaranteed, so cache boundaries in the repository rather than requesting them on every page view. [API documentation](https://www.geoboundaries.org/api.html).
+- **Regional economic data — [OECD SDMX API](https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html):** free programmatic access, subject to OECD terms and rate limits. The regional-economy datasets include larger and smaller regions (TL2/TL3) with measures such as GDP, gross value added, employment, and productivity; coverage is not worldwide. [API guidance](https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html) · [Regional economics dataset](https://data-explorer.oecd.org/vis?df%5Bag%5D=OECD.CFE.EDS&df%5Bds%5D=dsDisseminateFinalDMZ&df%5Bid%5D=DSD_REG_ECO%40DF_ECO&df%5Bvs%5D=2.4).
+- **EU regional indicators — [Eurostat API](https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction):** public, free REST access for regional statistics, useful when exploring NUTS regions and EU comparisons.
+- **Agriculture and food systems — [FAOSTAT API portal](https://www.fao.org/statistics/highlights-archive/highlights-detail/faostat-launches-a-new-api-developer-portal-to-make-data-access-easier/en):** FAO announced a free API portal in April 2026 with data covering more than 245 countries and territories. Useful for crop production, food balance, trade, and agricultural specialization signals.
+- **Industrial structure — [UNIDO Statistics API](https://stat.unido.org/unido-statistics-portal-api):** published API endpoints for INDSTAT, IDSB, national accounts, and manufacturing trade datasets. Check the dataset-specific access and rate limits before using it for an automated public workflow.
+- **News and emerging issues — [GDELT DOC 2.0 API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/):** candidate for multilingual news searches and emerging-topic discovery. Treat its results as leads, deduplicate stories, preserve publisher links, and corroborate before scoring an S³ signal.
+- **Environment and green-transition context — [OpenAQ API](https://docs.openaq.org/):** public air-quality data, but an API key is required; the documented general-use tier is free with rate limits. Useful for environmental context, not a direct measure of industrial opportunity.
+
+**Recommended order:** (1) cache Admin 1 boundaries for regional map exploration; (2) use OECD/Eurostat where geography and data support regional comparisons; (3) add FAOSTAT and UNIDO to sector-specific indicators; (4) use GDELT for document signals. Keep all API collection in the weekly pipeline, and do not call heavy data APIs from every browser session.
+
 ## Interpretation and limitations
 
 - The research pipeline retrieves bounded results per configured topic and provider; publication-month counts are the returned query results, not a census of global research.
