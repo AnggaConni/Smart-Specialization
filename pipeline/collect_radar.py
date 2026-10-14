@@ -754,6 +754,38 @@ def gdelt_url_key(value: str) -> str:
         return ""
 
 
+class GDELTRateLimitError(RuntimeError):
+    """Raised after the GDELT endpoint continues returning HTTP 429."""
+
+
+def request_gdelt_json(
+    session: requests.Session,
+    params: dict[str, Any],
+    timeout: int = 35,
+    max_retries: int = 2,
+) -> Any:
+    """GDELT-specific retry policy, independent of the more aggressive global API adapter."""
+    for attempt in range(max_retries + 1):
+        response = session.get(GDELT_DOC_URL, params=params, timeout=timeout)
+        if response.status_code == 429:
+            if attempt >= max_retries:
+                retry_after = response.headers.get("Retry-After", "")
+                raise GDELTRateLimitError(
+                    "GDELT returned HTTP 429 after bounded retries"
+                    + (f" (Retry-After: {retry_after}s)" if retry_after.isdigit() else "")
+                )
+            retry_after = response.headers.get("Retry-After", "")
+            try:
+                delay = float(retry_after) if retry_after else (5.0 * (2 ** attempt))
+            except (TypeError, ValueError):
+                delay = 5.0 * (2 ** attempt)
+            time.sleep(min(45.0, max(3.0, delay)))
+            continue
+        response.raise_for_status()
+        return response.json()
+    raise GDELTRateLimitError("GDELT retries exhausted")
+
+
 def fetch_gdelt_news(
     session: requests.Session, config: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], dict[str, Any], list[str]]:
@@ -767,32 +799,44 @@ def fetch_gdelt_news(
         "status": "error",
         "queries_requested": len(queries),
         "queries_ok": 0,
+        "queries_failed": 0,
         "records": 0,
         "window": "7 days",
         "authentication": "No API key required",
+        "rate_limited": False,
     }
+    # Do not use the general collector adapter's automatic retry policy here. GDELT
+    # needs its own small retry budget so one 429 does not trigger retries for every
+    # remaining query in the same weekly run.
+    gdelt_session = requests.Session()
+    gdelt_session.headers.update(session.headers)
+    gdelt_session.mount("https://", HTTPAdapter(max_retries=Retry(total=0)))
     combined: dict[str, dict[str, Any]] = {}
+    pause = max(2.0, float(config.get("gdelt_pause_seconds", 3.0)))
+    max_records = min(50, max(1, int(config.get("gdelt_max_records_per_query", 20))))
+
     for topic in queries:
         query = clean_text(topic.get("query"), 500)
         if not query:
             continue
+        rate_limit_hit = False
         try:
-            payload = request_json(
-                session,
-                GDELT_DOC_URL,
+            payload = request_gdelt_json(
+                gdelt_session,
                 params={
                     "query": query,
                     "mode": "ArtList",
                     "format": "json",
-                    "maxrecords": min(50, max(1, int(config.get("gdelt_max_records_per_query", 30)))),
+                    "maxrecords": max_records,
                     "timespan": "7d",
                     "sort": "HybridRel",
                 },
                 timeout=35,
+                max_retries=2,
             )
             articles = payload.get("articles", []) if isinstance(payload, dict) else []
             if not isinstance(articles, list):
-                raise RuntimeError("Unexpected GDELT response shape: 'articles' is not a list")
+                raise RuntimeError("Unexpected GDELT response: 'articles' is not a list")
             status["queries_ok"] += 1
             for article in articles:
                 title = clean_text(article.get("title"), 500)
@@ -828,25 +872,45 @@ def fetch_gdelt_news(
                         existing["source_country"] = source_country
                     if not existing.get("publication_date") and published:
                         existing["publication_date"] = published
-            time.sleep(max(0.25, float(config.get("gdelt_pause_seconds", 0.6))))
+        except GDELTRateLimitError as exc:
+            status["rate_limited"] = True
+            status["queries_failed"] += 1
+            warnings.append(str(exc) + "; remaining GDELT topics were skipped to avoid further load.")
+            LOG.warning("GDELT rate limit reached; stopping remaining topic requests.")
+            rate_limit_hit = True
         except (requests.RequestException, ValueError, TypeError, RuntimeError) as exc:
-            warnings.append(f"GDELT query '{query}' failed: {exc}")
-            LOG.warning("GDELT query failed (%s): %s", query, exc)
+            status["queries_failed"] += 1
+            code = getattr(getattr(exc, "response", None), "status_code", None)
+            if code == 429:
+                status["rate_limited"] = True
+                warnings.append("GDELT returned HTTP 429; remaining GDELT topics were skipped.")
+                rate_limit_hit = True
+            else:
+                # Keep diagnostics short; avoid dumping encoded query URLs into the UI.
+                warnings.append(f"GDELT topic '{clean_text(topic.get('sector'), 100)}' failed: {type(exc).__name__}: {clean_text(exc, 180)}")
+                LOG.warning("GDELT topic request failed (%s): %s", topic.get("sector"), type(exc).__name__)
+        finally:
+            # Pace both successful and failed topics. If 429 has been exhausted, stop
+            # after this bounded delay rather than immediately hitting the next topic.
+            time.sleep(pause)
+        if rate_limit_hit:
+            break
 
     today = date.today()
     news = list(combined.values())
     for item in news:
         published = safe_date(item.get("publication_date"))
         age = (today - date.fromisoformat(published)).days if published else 999
-        # This is a freshness/relevance triage value, not a truth or impact score.
         item["freshness_score"] = max(0, 100 - min(100, age * 4)) if published else 0
         item["publication_date"] = published
     news.sort(key=lambda item: (item.get("publication_date") or "", item.get("freshness_score") or 0), reverse=True)
     news = news[:500]
     status["records"] = len(news)
-    if status["queries_ok"] == 0 and queries:
+    if status["rate_limited"]:
+        status["status"] = "partial" if status["queries_ok"] else "rate-limited"
+    elif status["queries_ok"] == 0 and queries:
         status["status"] = "error"
-    elif warnings:
+    elif status["queries_failed"]:
         status["status"] = "partial"
     else:
         status["status"] = "ok"
@@ -909,10 +973,22 @@ def main() -> int:
     if not flows and previous.get("trade_flows"):
         flows = previous["trade_flows"]
         warnings.append("Bilateral trade flow refresh failed or returned no rows; the previous flow snapshot was retained.")
-    if gdelt_status["status"] == "error" and previous.get("news_signals"):
+    if gdelt_status["status"] in {"error", "rate-limited"} and previous.get("news_signals"):
         news = previous["news_signals"]
-        warnings.append("GDELT refresh failed; the previous news snapshot was retained.")
+        warnings.append("GDELT returned no usable fresh results; the previous news snapshot was retained.")
         gdelt_status["status"] = "stale-fallback"
+    elif gdelt_status["status"] == "partial" and previous.get("news_signals"):
+        # Keep usable results from successful topics and fill gaps with recent previous records.
+        by_url = {gdelt_url_key(str(item.get("url") or "")): item for item in news if gdelt_url_key(str(item.get("url") or ""))}
+        cutoff = date.today() - timedelta(days=30)
+        for old_item in previous["news_signals"]:
+            old_url = gdelt_url_key(str(old_item.get("url") or ""))
+            old_date = safe_date(old_item.get("publication_date"))
+            if old_url and old_url not in by_url and old_date and date.fromisoformat(old_date) >= cutoff:
+                retained = dict(old_item)
+                retained["retained_from_previous_snapshot"] = True
+                by_url[old_url] = retained
+        news = sorted(by_url.values(), key=lambda item: str(item.get("publication_date") or ""), reverse=True)[:500]
     if not sources_ok and not previous:
         raise RuntimeError("All data providers failed and no previous snapshot exists; refusing to publish an empty snapshot.")
 
