@@ -19,7 +19,7 @@ class RadarTransformTests(unittest.TestCase):
     def test_gdelt_url_key_normalizes_host_and_fragment(self):
         self.assertEqual(
             RADAR.gdelt_url_key("HTTPS://Example.COM/story/?utm_source=test#section"),
-            "https://example.com/story/?utm_source=test",
+            "https://example.com/story?utm_source=test",
         )
         self.assertEqual(RADAR.gdelt_url_key("javascript:alert(1)"), "")
 
