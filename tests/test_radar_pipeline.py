@@ -20,6 +20,20 @@ class RadarTransformTests(unittest.TestCase):
         }
         self.assertEqual(RADAR.publication_date_from_crossref(item), "2025-02-12")
 
+    def test_openalex_skips_implausible_future_publication_year(self):
+        work = {
+            "title": "A study of regional innovation",
+            "publication_date": "2121-10-01",
+            "publication_year": 2121,
+            "doi": "https://doi.org/10.1000/future",
+            "primary_location": {"landing_page_url": "https://example.org/study", "source": {"display_name": "Example Journal"}},
+        }
+        topic = {"sector": "Regional Innovation", "query": "regional innovation"}
+        record = RADAR.openalex_record(work, topic)
+        self.assertIsNotNone(record)
+        self.assertIsNone(record["publication_date"])
+        self.assertIsNone(record["year"])
+
     def test_reconstruct_abstract(self):
         abstract = {"smart": [0], "regions": [1], "innovate": [2]}
         self.assertEqual(RADAR.reconstruct_abstract(abstract), "smart regions innovate")
