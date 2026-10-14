@@ -1,7 +1,7 @@
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id)};
-var state={data:null,signals:[],newsSignals:[],tradeProducts:[],tradeFlows:[],countries:[],map:null,mapTiles:null,markers:null,flowLayer:null,boundaryLayer:null,boundaryCache:{},currentBoundaryKey:null,boundaryMetadata:null,boundaryVisible:false,selectedAdminUnit:null,cartoKey:"",tileProvider:"osm",charts:{},selectedSignal:null,selectedFlow:null,selectedCountry:null,mapMode:"all",mapLayers:[],visibleSignals:[]};
+var state={data:null,signals:[],newsSignals:[],tradeProducts:[],tradeFlows:[],countries:[],map:null,mapTiles:null,markers:null,flowLayer:null,boundaryLayer:null,boundaryCache:{},currentBoundaryKey:null,boundaryMetadata:null,boundaryVisible:false,selectedAdminUnit:null,cartoKey:"",tileProvider:"osm",charts:{},selectedSignal:null,selectedFlow:null,selectedCountry:null,mapMode:"all",mapLayers:[],visibleSignals:[],policyBriefText:""};
 var chartColors=["#0b8176","#8bbd38","#7567d8","#d69b33","#3385cc","#d16b87","#39a2a1","#7e91a8","#a06c4c"];
 var translations={"ok":"OK","partial":"Partial","partial-refresh":"Partial refresh","preview-limited":"Preview limited","preview-limited-trade":"Trade preview limited","fresh":"Fresh","pending":"Pending","error":"Error","stale-fallback":"Using previous snapshot"};
 function escapeHtml(value){return String(value==null?"":value).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -269,7 +269,7 @@ window.addEventListener("resize",function(){if(state.map)setTimeout(function(){s
 
 $("refreshButton").addEventListener("click",loadData);
 $("newsSearch").addEventListener("input",renderNewsSignals);$("newsSectorFilter").addEventListener("change",renderNewsSignals);
-$("generatePolicyBrief").addEventListener("click",generatePolicyBrief);$("downloadPolicyBrief").addEventListener("click",downloadPolicyBrief);$("policyCountry").addEventListener("change",function(){state.policyBriefText="";$("downloadPolicyBrief").disabled=true;$("policyBriefStatus").textContent="Scope changed. Rebuild the brief to use the selected country."});
+$("generatePolicyBrief").addEventListener("click",generatePolicyBrief);$("downloadPolicyBrief").addEventListener("click",downloadPolicyBrief);function markPolicyBriefStale(){state.policyBriefText="";$("downloadPolicyBrief").disabled=true;$("policyBriefStatus").textContent="Brief inputs changed. Rebuild the brief before downloading."}["policyCountry","policySector","policyAudience","policyHorizon","policyQuestion"].forEach(function(id){$(id).addEventListener("change",markPolicyBriefStale);$(id).addEventListener("input",markPolicyBriefStale)});
 $("exportBtn").addEventListener("click",exportCsv);
 $("resetFilters").addEventListener("click",function(){$("searchInput").value="";$("sectorFilter").value="all";$("sourceFilter").value="all";$("marketFilter").value="all";renderDashboard()});
 ["searchInput","sectorFilter","sourceFilter","marketFilter"].forEach(function(id){$(id).addEventListener(id==="searchInput"?"input":"change",function(){if(id==="marketFilter")renderMap();renderSignals();renderTradeTable();renderFlowNetwork();renderCharts()})});
