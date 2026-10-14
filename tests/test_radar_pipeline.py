@@ -16,6 +16,56 @@ class RadarTransformTests(unittest.TestCase):
     def test_gdelt_date_parser_accepts_seendate(self):
         self.assertEqual(RADAR.gdelt_date("20261014T102030Z"), "2026-10-14")
 
+    def test_gdelt_request_uses_bounded_retries_for_429(self):
+        class FakeResponse:
+            status_code = 429
+            headers = {}
+            def json(self):
+                return {}
+        class FakeSession:
+            def __init__(self):
+                self.calls = 0
+                self.headers = {}
+            def get(self, *args, **kwargs):
+                self.calls += 1
+                return FakeResponse()
+        session = FakeSession()
+        from unittest.mock import patch
+        with patch.object(RADAR.time, "sleep"):
+            with self.assertRaises(RADAR.GDELTRateLimitError):
+                RADAR.request_gdelt_json(session, {}, max_retries=2)
+        self.assertEqual(session.calls, 3)
+
+    def test_gdelt_rate_limit_stops_remaining_queries(self):
+        class FakeResponse:
+            status_code = 429
+            headers = {}
+            def json(self):
+                return {}
+        class FakeSession:
+            def __init__(self):
+                self.calls = 0
+                self.headers = {}
+            def mount(self, *args, **kwargs):
+                pass
+            def get(self, *args, **kwargs):
+                self.calls += 1
+                return FakeResponse()
+        from unittest.mock import patch
+        fake = FakeSession()
+        config = {"news_queries": [
+            {"sector": "First", "query": "first topic"},
+            {"sector": "Second", "query": "second topic"},
+            {"sector": "Third", "query": "third topic"},
+        ], "gdelt_pause_seconds": 2}
+        with patch.object(RADAR.requests, "Session", return_value=fake), patch.object(RADAR.time, "sleep"):
+            news, status, warnings = RADAR.fetch_gdelt_news(FakeSession(), config)
+        self.assertEqual(status["status"], "rate-limited")
+        self.assertEqual(status["queries_ok"], 0)
+        self.assertEqual(fake.calls, 3)
+        self.assertTrue(warnings)
+        self.assertNotIn("query=", warnings[0])
+
     def test_gdelt_url_key_normalizes_host_and_fragment(self):
         self.assertEqual(
             RADAR.gdelt_url_key("HTTPS://Example.COM/story/?utm_source=test#section"),
