@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Build a source-attributed S3 Smart Specialization Radar JSON snapshot.
 
-The frontend consumes data/radar-data.json. This collector uses public APIs and
-keeps source status, publication dates, retrieval dates, limitations, and failures
-visible. UN Comtrade is optional-key: unauthenticated preview data is limited.
+The frontend consumes data/radar-data.json. Weekly sources include OpenAlex and
+Crossref research metadata, World Bank country indicators, UN Comtrade import
+observations, and GDELT DOC 2.0 source-linked news discovery leads. The browser may
+request geoBoundaries administrative polygons when a user explores a country;
+those polygons are not statistical indicators and are not scraped by this job.
+The collector preserves source status, publication dates, limitations, and errors.
+UN Comtrade is optional-key: unauthenticated preview data is limited.
 """
 from __future__ import annotations
 
