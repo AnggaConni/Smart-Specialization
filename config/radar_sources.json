@@ -47,5 +47,37 @@
       "sector": "Skills & Workforce",
       "query": "future skills workforce transformation regional development"
     }
-  ]
+  ],
+  "news_queries": [
+    {
+      "sector": "Regional Innovation",
+      "query": "(\"regional innovation\" OR \"smart specialisation\" OR \"smart specialization\")"
+    },
+    {
+      "sector": "Advanced Manufacturing",
+      "query": "(\"advanced manufacturing\" OR \"industrial innovation\" OR \"factory investment\")"
+    },
+    {
+      "sector": "Green Industry",
+      "query": "(\"industrial decarbonisation\" OR \"circular economy\" OR \"green manufacturing\")"
+    },
+    {
+      "sector": "Agri-food",
+      "query": "(\"agri-food\" OR \"food processing\" OR \"agricultural technology\")"
+    },
+    {
+      "sector": "Trade & Logistics",
+      "query": "(\"supply chain\" OR \"port logistics\" OR \"trade facilitation\")"
+    },
+    {
+      "sector": "Digital Economy",
+      "query": "(\"digital economy\" OR \"AI adoption\" OR \"digital services\")"
+    },
+    {
+      "sector": "Skills & Workforce",
+      "query": "(\"future skills\" OR \"workforce transformation\" OR \"vocational training\")"
+    }
+  ],
+  "gdelt_max_records_per_query": 30,
+  "gdelt_pause_seconds": 0.6
 }
