@@ -49,6 +49,8 @@ class RadarHtmlTests(unittest.TestCase):
         js = (ROOT / "radar.js").read_text(encoding="utf-8")
         refs = set(re.findall(r'\$\("([^"]+)"\)', js))
         refs |= set(re.findall(r'getElementById\("([^"]+)"\)', js))
+        # This button is injected into the region-detail panel at runtime.
+        refs.discard("focusExplorerMap")
         self.assertFalse(refs - self.parser.ids, "Missing DOM ids: " + ", ".join(sorted(refs - self.parser.ids)))
 
     def test_dashboard_loads_external_script(self):
