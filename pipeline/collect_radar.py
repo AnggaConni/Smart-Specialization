@@ -314,6 +314,7 @@ def fetch_research(session: requests.Session, config: dict[str, Any], since: str
         "crossref": {"name": "Crossref", "url": "https://www.crossref.org/", "status": "error", "records": 0, "requests_ok": 0},
     }
     email = os.getenv("S3_CONTACT_EMAIL", "").strip()
+    openalex_api_key = os.getenv("OPENALEX_API_KEY", "").strip()
     topics = config.get("topics", [])
     for topic in topics:
         # OpenAlex provides bibliographic metadata and abstract inverted indexes.
@@ -326,6 +327,8 @@ def fetch_research(session: requests.Session, config: dict[str, Any], since: str
             }
             if email and "@" in email:
                 params["mailto"] = email
+            if openalex_api_key:
+                params["api_key"] = openalex_api_key
             payload = request_json(session, OPENALEX_URL, params=params)
             results = payload.get("results", []) if isinstance(payload, dict) else []
             converted = [row for row in (openalex_record(item, topic) for item in results) if row]
@@ -791,7 +794,7 @@ def fetch_gdelt_news(
                     continue
                 published = gdelt_date(article.get("seendate") or article.get("date"))
                 source_country = clean_text(article.get("sourcecountry"), 100)
-                record_id = key_id({"title": title, "url": url})
+                record_id = key_id({"title": url})
                 sector = clean_text(topic.get("sector") or "Emerging Signals", 100)
                 existing = combined.get(url)
                 if existing is None:
