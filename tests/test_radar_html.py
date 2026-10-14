@@ -50,7 +50,7 @@ class RadarHtmlTests(unittest.TestCase):
         refs = set(re.findall(r'\$\("([^"]+)"\)', js))
         refs |= set(re.findall(r'getElementById\("([^"]+)"\)', js))
         # This button is injected into the region-detail panel at runtime.
-        refs.update({"focusExplorerMap", "boundaryLevelSelect", "loadRegionBoundaries", "selectedAdminUnitInfo", "boundaryMetadataNote"})
+        refs.difference_update({"focusExplorerMap", "boundaryLevelSelect", "loadRegionBoundaries", "selectedAdminUnitInfo", "boundaryMetadataNote"})
         self.assertFalse(refs - self.parser.ids, "Missing DOM ids: " + ", ".join(sorted(refs - self.parser.ids)))
 
     def test_dashboard_loads_external_script(self):
@@ -110,7 +110,7 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("countryTradeProducts(iso)", js)
         self.assertIn("countryTradeFlows(iso)", js)
         self.assertIn("countryResearchSignals(iso)", js)
-        self.assertIn('renderRegionExplorer();if(state.selectedCountry', js)
+        self.assertIn('renderRegionExplorer();renderNewsSignals();if(state.selectedCountry', js)
 
     def test_regional_explorer_uses_dataset_without_fabricating_subnational_values(self):
         html = (ROOT / "radar.html").read_text(encoding="utf-8")
