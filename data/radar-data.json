@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "meta": {
+    "project": "S3 Smart Specialization Radar",
+    "generated_at": null,
+    "lookback_start": null,
+    "lookback_days": 730,
+    "refresh_cadence": "weekly",
+    "status": "awaiting-first-refresh",
+    "limitations": [
+      "The first scheduled or manually triggered data refresh has not completed yet.",
+      "Research records are bibliographic signals, not proof of regional demand or commercial impact.",
+      "Trade values are reported import statistics, not retail sales, orders, revenue or profit."
+    ],
+    "sources": [
+      {
+        "name": "OpenAlex",
+        "url": "https://openalex.org/",
+        "status": "pending",
+        "records": 0
+      },
+      {
+        "name": "Crossref",
+        "url": "https://www.crossref.org/",
+        "status": "pending",
+        "records": 0
+      },
+      {
+        "name": "World Bank Indicators API",
+        "url": "https://api.worldbank.org/v2/",
+        "status": "pending",
+        "countries": 0
+      },
+      {
+        "name": "UN Comtrade",
+        "url": "https://comtradeplus.un.org/",
+        "status": "pending",
+        "mode": "preview-limited",
+        "flow_records": 0
+      }
+    ],
+    "warnings": [
+      "Awaiting the first successful collection run."
+    ],
+    "counts": {
+      "signals": 0,
+      "trade_products": 0,
+      "trade_flows": 0,
+      "mapped_countries": 0
+    }
+  },
+  "signals": [],
+  "trade_products": [],
+  "trade_flows": [],
+  "countries": []
+}
