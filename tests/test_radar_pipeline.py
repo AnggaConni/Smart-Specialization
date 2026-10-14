@@ -13,6 +13,16 @@ class RadarTransformTests(unittest.TestCase):
     def test_normalise_doi(self):
         self.assertEqual(RADAR.normalise_doi("https://doi.org/10.1000/ABC"), "10.1000/abc")
 
+    def test_gdelt_date_parser_accepts_seendate(self):
+        self.assertEqual(RADAR.gdelt_date("20261014T102030Z"), "2026-10-14")
+
+    def test_gdelt_url_key_normalizes_host_and_fragment(self):
+        self.assertEqual(
+            RADAR.gdelt_url_key("HTTPS://Example.COM/story/?utm_source=test#section"),
+            "https://example.com/story/?utm_source=test",
+        )
+        self.assertEqual(RADAR.gdelt_url_key("javascript:alert(1)"), "")
+
     def test_crossref_skips_implausible_future_publication_date(self):
         item = {
             "published": {"date-parts": [[2121, 10, 1]]},
