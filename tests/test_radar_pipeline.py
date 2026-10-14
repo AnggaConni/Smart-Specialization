@@ -13,6 +13,13 @@ class RadarTransformTests(unittest.TestCase):
     def test_normalise_doi(self):
         self.assertEqual(RADAR.normalise_doi("https://doi.org/10.1000/ABC"), "10.1000/abc")
 
+    def test_crossref_skips_implausible_future_publication_date(self):
+        item = {
+            "published": {"date-parts": [[2121, 10, 1]]},
+            "created": {"date-parts": [[2025, 2, 12]]},
+        }
+        self.assertEqual(RADAR.publication_date_from_crossref(item), "2025-02-12")
+
     def test_reconstruct_abstract(self):
         abstract = {"smart": [0], "regions": [1], "innovate": [2]}
         self.assertEqual(RADAR.reconstruct_abstract(abstract), "smart regions innovate")
