@@ -130,7 +130,7 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("countryTradeProducts(iso)", js)
         self.assertIn("countryTradeFlows(iso)", js)
         self.assertIn("countryResearchSignals(iso)", js)
-        self.assertIn('renderRegionExplorer();renderNewsSignals();if(state.selectedCountry', js)
+        self.assertIn('renderRegionExplorer();renderNewsSignals();renderPolicyControls();if(state.selectedCountry', js)
 
     def test_regional_explorer_uses_dataset_without_fabricating_subnational_values(self):
         html = (ROOT / "radar.html").read_text(encoding="utf-8")
