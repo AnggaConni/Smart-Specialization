@@ -71,6 +71,16 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("function useOsmFallback(message)", js)
         self.assertIn("CARTO key was rejected; OpenStreetMap fallback active", js)
 
+    def test_map_supports_fullscreen_and_mouse_wheel_zoom(self):
+        self.assertIn('id="mapShell"', self.html)
+        self.assertIn('id="mapFullscreenToggle"', self.html)
+        self.assertIn("Scroll to zoom", self.html)
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn("scrollWheelZoom:true", js)
+        self.assertIn("requestFullscreen()", js)
+        self.assertIn('document.addEventListener("fullscreenchange",updateFullscreenButton)', js)
+        self.assertIn("invalidateSize({pan:false})", js)
+
     def test_regional_explorer_controls_and_rendering_exist(self):
         required = {
             "regional-explorer", "regionSearch", "regionGroupFilter",
