@@ -57,6 +57,17 @@ jobs:
           else
             git commit -m "chore(data): refresh S3 radar snapshot"
             git fetch --no-tags --deepen=50 origin +refs/heads/main:refs/remotes/origin/main
-            git rebase origin/main
+            if ! git rebase origin/main; then
+              if git status --porcelain | grep -q 'data/radar-data.json'; then
+                # Concurrent refreshes can both generate this snapshot.
+                # Keep the current collector's freshly generated JSON while replaying the commit.
+                git checkout --theirs -- data/radar-data.json
+                git add data/radar-data.json
+                GIT_EDITOR=true git rebase --continue
+              else
+                git rebase --abort
+                exit 1
+              fi
+            fi
             git push origin HEAD:main
           fi
