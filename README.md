@@ -6,7 +6,7 @@
 
 - **[S³ Landing page](https://anggaconni.github.io/Smart-Specialization/)** — project overview and navigation.
 - **[Specialization Calculator](https://anggaconni.github.io/Smart-Specialization/calculator.html)** — structured assessment and reporting.
-- **[Strategic Radar](https://anggaconni.github.io/Smart-Specialization/radar.html)** — analytics, regional explorer, interactive map, reported trade products and partner links, research records, and news/policy discovery.
+- **[Strategic Radar](https://anggaconni.github.io/Smart-Specialization/radar.html)** — analytics, regional explorer, interactive map, reported trade products and partner links, research records, news/policy discovery, and the **Policy Support Lab** for source-linked briefing drafts.
 
 The Radar uses **English by default**, starts in the **bright theme**, and offers a dark-theme switch. The browser remembers the theme. The header contains a Google Translate widget. The Leaflet map supports dragging, mouse-wheel zoom and fullscreen mode. The regional explorer can request administrative boundaries when a country and ADM level are selected.
 
@@ -23,6 +23,14 @@ The Radar uses **English by default**, starts in the **bright theme**, and offer
 | [GDELT DOC 2.0](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) | Source-linked news leads for configured themes: regional innovation, manufacturing, green industry, agri-food, trade/logistics, digital economy, and skills. | Public API; no API key required. The weekly pipeline searches a rolling 7-day window. Results are leads for human review—not verified events or facts. |
 
 The collector writes a source-attributed snapshot to **data/radar-data.json**. The page reads this snapshot; it does not run the full collection pipeline from each visitor's browser.
+
+### Policy Support Lab: government and UN use
+
+The **Policy Support Lab** creates a downloadable Markdown evidence brief for a selected country/market, sector focus, intended audience (government, UN Country Team/agency, development partner or regional organisation), planning horizon and user-entered decision question. It assembles the currently available World Bank indicators, relevant S³ research-theme records, reported trade observations and GDELT theme-matched news leads; then adds transparent candidate policy options for appraisal, candidate SDG alignments, monitoring questions and evidence gaps.
+
+This is a **deterministic, source-linked drafting aid** using the published snapshot, not an AI-generated or validated policy recommendation. It does not claim an official UN/government position, score policy impact, calculate implementation costs, or infer province-level economic outcomes from boundaries. News matches are topic matches, not proof that an event occurred in the selected country. Analysts should check original sources, national development plans, laws, budget availability, distributional and environmental safeguards, and official SDG indicators before use.
+
+The next major data integration recommended for this audience is the [UN Statistics Division SDG API](https://unstats.un.org/SDGAPI/swagger/) for official SDG indicator metadata/data, plus the [World Bank Projects API](https://datahelpdesk.worldbank.org/knowledgebase/articles/889386-developer-information-overview) and [Documents & Reports API](https://documents.worldbank.org/en/publication/documents-reports/api) for project and policy-document evidence. These are documented below as candidates and are not yet wired into S³.
 
 ### Geospatial and map services used in the browser
 
@@ -62,6 +70,9 @@ The options below are documented for future work; **they are not all integrated 
 | API / dataset | Potential S³ use | Free access and current integration status |
 |---|---|---|
 | [World Bank Official Boundaries](https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries) | Alternative Admin 0/1/2 polygons and region attributes. | Public dataset, CC BY 4.0; **candidate, not currently used**. The current on-demand polygon tool is geoBoundaries. |
+| [UN Statistics Division SDG API](https://unstats.un.org/SDGAPI/swagger/) | Official SDG goal/target/indicator metadata and reported global/country series for progress monitoring and policy alignment. | Public API documentation and endpoints; confirm the relevant endpoint, geographies, series and update dates. **Candidate, not yet integrated.** |
+| [World Bank Projects API](https://datahelpdesk.worldbank.org/knowledgebase/articles/889386-developer-information-overview) | Active, pipeline and closed development operations by country/sector, to identify existing programme portfolios and possible overlap. | Public API. It covers World Bank operations—not all government/UN/donor projects. **Candidate, not yet integrated.** |
+| [World Bank Documents & Reports API](https://documents.worldbank.org/en/publication/documents-reports/api) | Find policy reports, economic updates, evaluations and development publications to expand the evidence base. | Public REST API for public documents; respect the source's metadata, links and reuse terms. **Candidate, not yet integrated.** |
 | [OECD SDMX / Data Explorer API](https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html) | Regional GDP, gross value added, employment and productivity for regions covered by OECD datasets. | API access is free subject to OECD terms and rate limits; geographic coverage is not worldwide. **Not integrated yet.** |
 | [Eurostat APIs](https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction) | EU regional (NUTS) statistics, including economic structure and labour data. | REST access is free of charge; datasets have their own dimensions and definitions. **Not integrated yet.** |
 | [FAOSTAT API developer portal](https://www.fao.org/statistics/highlights-archive/highlights-detail/faostat-launches-a-new-api-developer-portal-to-make-data-access-easier/en) | Agriculture, production, food balances and related specialisation context. | FAO announced free programmatic API access in April 2026 with coverage of more than 245 countries and territories. Check the portal's endpoint documentation before building a collector. **Not integrated yet.** |
@@ -69,7 +80,7 @@ The options below are documented for future work; **they are not all integrated 
 | [OpenAQ API](https://docs.openaq.org/) | Air-quality and environmental context for green-transition exploration. | API key required. The documented general-use tier is free, with a rate limit of 60 requests/minute and 2,000/hour; higher limits require a custom arrangement. Environmental observations are not direct indicators of industrial competitiveness. **Not integrated yet.** |
 | [GBIF API](https://www.gbif.org/developer/summary) | Biodiversity observations and ecosystem context, where relevant to place-based opportunities. | Public occurrence API with responsible-use limits; individual datasets retain their licences. **Not integrated yet.** |
 
-**Suggested expansion order:** (1) continue testing geoBoundaries ADM1/ADM2 display; (2) add regional indicators only where authoritative data and region codes align; (3) add FAOSTAT/UNIDO datasets for sector-specific evidence; (4) add OECD/Eurostat for covered regions; (5) expand the GDELT topic registry carefully. Preserve each record's source, date, geography, coverage, licence and uncertainty.
+**Suggested expansion order:** (1) wire the UN SDG API into an official indicator panel with series, units, disaggregation and reference years; (2) ingest World Bank project/document metadata with country/sector filters and overlap checks; (3) add regional indicators only where authoritative data and geographic codes align; (4) add FAOSTAT/UNIDO datasets for sector-specific evidence; (5) expand GDELT topics only with backoff, caching and a bounded query budget. Preserve each record's source, date, geography, coverage, licence and uncertainty.
 
 ## Weekly refresh and manual run
 
