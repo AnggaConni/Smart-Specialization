@@ -1,0 +1,63 @@
+name: S3 Radar weekly data refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly on Mondays at 09:17 WIB (02:17 UTC).
+    - cron: "17 2 * * 1"
+  push:
+    paths:
+      - "pipeline/**"
+      - "config/radar_sources.json"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/refresh-radar.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: s3-radar-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Collect, validate and publish S3 Radar data
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run pipeline unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Collect S3 research, trade and country signals
+        env:
+          UN_COMTRADE_API_KEY: \${{ secrets.UN_COMTRADE_API_KEY || secrets.COMTRADE_API_KEY }}
+          S3_CONTACT_EMAIL: \${{ vars.S3_CONTACT_EMAIL }}
+          S3_REQUEST_SLEEP_SECONDS: "0.7"
+          PYTHONUNBUFFERED: "1"
+        run: python pipeline/collect_radar.py
+      - name: Validate published JSON
+        run: python -c "import json,pathlib; p=pathlib.Path('data/radar-data.json'); d=json.loads(p.read_text(encoding='utf-8')); assert isinstance(d.get('signals'),list); assert isinstance(d.get('trade_flows'),list); assert isinstance(d.get('countries'),list); print('Snapshot valid:', d.get('meta',{}).get('counts',{}))"
+      - name: Commit snapshot only when changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/radar-data.json
+          if git diff --cached --quiet; then
+            echo "Radar snapshot unchanged."
+          else
+            git commit -m "chore(data): refresh S3 radar snapshot"
+            git fetch --no-tags --deepen=50 origin +refs/heads/main:refs/remotes/origin/main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
