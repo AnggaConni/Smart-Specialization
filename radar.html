@@ -45,9 +45,55 @@ main{padding:27px 0 48px}.hero{display:flex;justify-content:space-between;align-
 .records-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(290px,.95fr);gap:13px}.signal-list{padding:8px;max-height:600px;overflow:auto;display:grid;gap:5px}.signal-card{display:grid;grid-template-columns:35px minmax(0,1fr) auto;gap:9px;align-items:start;border:1px solid transparent;border-radius:10px;padding:10px;cursor:pointer;transition:background .12s,border-color .12s}.signal-card:hover,.signal-card.active{background:var(--panel-soft);border-color:var(--line)}.signal-symbol{width:33px;height:33px;display:grid;place-items:center;border-radius:9px;color:var(--accent);background:var(--accent-soft);font-size:16px}.signal-card h3{font:750 12px/1.35 Manrope;margin:1px 0 4px;color:var(--ink)}.signal-card p{font-size:10px;color:var(--muted);margin:0}.signal-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.score{font-size:9px;font-weight:800;border-radius:6px;padding:4px 5px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}.signal-detail{padding:17px}.signal-detail h3{font:800 20px/1.22 Manrope;letter-spacing:-.035em;margin:8px 0}.signal-detail .summary{font-size:12px;line-height:1.65;color:var(--muted)}.signal-detail h4{font:800 10px Manrope;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px}.signal-detail ul{padding-left:17px;color:var(--muted);font-size:10px;margin:0}.signal-detail li{padding:3px 0;overflow-wrap:anywhere}.source-links{display:grid;gap:6px}.source-links a{font-size:10px;overflow-wrap:anywhere}.divider{height:1px;background:var(--line);margin:14px 0}.table-wrap{overflow:auto;max-height:440px}table{width:100%;border-collapse:collapse;font-size:10px}td,th{padding:10px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{background:var(--panel-soft);position:sticky;top:0;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.07em;z-index:2}tbody tr{cursor:pointer}tbody tr:hover{background:var(--panel-soft)}.table-primary{font-weight:750;color:var(--ink);white-space:normal;min-width:170px}.table-sub{display:block;font-size:9px;color:var(--muted);font-weight:400;margin-top:3px}.positive{color:var(--accent);font-weight:800}.negative{color:var(--red);font-weight:800}.source-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.source-card{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-width:0}.source-card h3{font:800 11px Manrope;margin:0 0 5px}.source-card p{font-size:9px;color:var(--muted);margin:7px 0;overflow-wrap:anywhere}.source-status{display:inline-flex;font-size:9px;border-radius:6px;padding:4px 6px;background:var(--panel-strong);color:var(--muted);font-weight:800}.source-status[data-status=ok]{background:var(--accent-soft);color:var(--accent)}.source-status[data-status=preview-limited]{background:rgba(186,121,26,.1);color:var(--amber)}.source-status[data-status=error],.source-status[data-status=stale-fallback]{background:rgba(184,64,88,.09);color:var(--red)}.source-bottom{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:9px;color:var(--muted)}.empty{padding:26px 16px;text-align:center;color:var(--muted);font-size:11px}.empty strong{display:block;color:var(--ink);font:800 14px Manrope;margin-bottom:5px}.footnote{margin-top:15px;padding:12px 14px;border:1px solid var(--line);background:var(--panel-soft);color:var(--muted);border-radius:10px;font-size:10px}.footnote strong{color:var(--ink)}footer{border-top:1px solid var(--line);padding:21px 0;color:var(--muted);font-size:10px}.footer-row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.footer-row a{color:var(--muted)}
 .leaflet-container{font-family:'DM Sans',sans-serif;background:var(--panel-strong)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}.leaflet-popup-content{font-size:11px;line-height:1.55}.leaflet-popup-content a{color:var(--accent)}.leaflet-tooltip{background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow)}.leaflet-control-attribution{font-size:9px!important}.leaflet-bar a{background:var(--panel)!important;color:var(--ink)!important;border-bottom-color:var(--line)!important}.leaflet-bar{border:1px solid var(--line)!important}
 .goog-te-menu-frame{z-index:4000!important}
+
+.region-explorer-tools{display:grid;grid-template-columns:minmax(200px,1.15fr) minmax(200px,1fr) minmax(200px,1fr);gap:8px;margin:0 0 12px;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.region-explorer-tools .control{width:100%;min-width:0}
+.region-explorer-layout{display:grid;grid-template-columns:minmax(260px,.7fr) minmax(0,1.3fr);gap:13px;align-items:start}
+.region-explorer-list{max-height:670px;overflow:auto;padding:7px;display:grid;gap:4px}
+.region-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ink);text-align:left;padding:9px;cursor:pointer}
+.region-option:hover,.region-option.active{background:var(--panel-soft);border-color:var(--line)}
+.region-option.active{box-shadow:inset 3px 0 0 var(--accent)}
+.region-option-main{min-width:0;display:grid;gap:3px}
+.region-option-main strong{font:750 11px Manrope;overflow-wrap:anywhere}
+.region-option-main small{font-size:9px;color:var(--muted);overflow-wrap:anywhere}
+.region-option-stats{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}
+.region-option-stats span{border-radius:5px;background:var(--panel-strong);padding:4px 5px;color:var(--muted);font-size:8px;font-weight:800}
+.region-explorer-detail{padding:15px;min-width:0}
+.region-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.region-detail-head h3{font:800 23px/1.15 Manrope;letter-spacing:-.04em;margin:6px 0}
+.region-detail-head p{font-size:10px;color:var(--muted);margin:0}
+.region-profile-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:15px 0}
+.region-profile-kpis div{border:1px solid var(--line);background:var(--panel-soft);border-radius:8px;padding:10px;min-width:0}
+.region-profile-kpis strong{display:block;font:800 18px Manrope;overflow-wrap:anywhere}
+.region-profile-kpis span{display:block;font-size:8px;color:var(--muted);margin-top:3px}
+.region-data-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.region-data-tile{border:1px solid var(--line);border-radius:8px;background:var(--panel-soft);padding:10px;min-width:0}
+.region-data-tile span{display:block;font-size:9px;color:var(--muted)}
+.region-data-tile strong{display:block;font:800 14px Manrope;margin:5px 0 2px;overflow-wrap:anywhere}
+.region-data-tile small{display:block;font-size:8px;color:var(--muted)}
+.region-section-heading{font:800 11px Manrope;margin:17px 0 7px}
+.region-section-heading-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.region-section-heading-row .region-section-heading{margin:7px 0}
+.region-section-heading-row>span{font-size:8px;color:var(--muted);text-align:right}
+.region-sublist{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.region-data-row{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;border:0;border-bottom:1px solid var(--line);padding:9px 10px;background:transparent;color:var(--ink);text-align:left}
+.region-data-row:last-child{border-bottom:0}
+.region-data-row span{display:grid;gap:4px;min-width:0}
+.region-data-row strong{font:700 10px Manrope;overflow-wrap:anywhere}
+.region-data-row small{font-size:8px;color:var(--muted);overflow-wrap:anywhere}
+.region-data-row b{font:800 10px Manrope;white-space:nowrap}
+button.region-flow-button,button.region-research-row{cursor:pointer}
+button.region-flow-button:hover,button.region-research-row:hover{background:var(--panel-soft)}
+.region-research-row{display:grid;gap:4px;width:100%;text-align:left;padding:9px 10px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--ink)}
+.region-research-row:last-child{border-bottom:0}
+.region-research-row strong{font:700 10px Manrope;overflow-wrap:anywhere}
+.region-research-row small{font-size:8px;color:var(--muted)}
+.region-empty-note{font-size:10px;color:var(--muted);padding:10px;border:1px dashed var(--line);border-radius:8px;margin:0}
+.region-data-footnote{font-size:9px;line-height:1.6;color:var(--muted)}
+
 @media(max-width:1100px){.navlinks{gap:11px}.navlinks a{font-size:11px}.analytics{grid-template-columns:1fr 1fr}.analytics>.panel:last-child{grid-column:1/-1}.source-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr)}}
-@media(max-width:850px){.nav{padding:10px 0;flex-wrap:wrap}.navlinks{order:3;width:100%;justify-content:flex-start;border-top:1px solid var(--line);padding-top:8px}.header-tools{margin-left:auto}.layout,.flow-layout,.records-layout{grid-template-columns:1fr}.hero{flex-direction:column}.hero-right{align-items:flex-start}.updated{text-align:left}.kpis{grid-template-columns:1fr 1fr}.region-summary{padding:14px}.map{height:360px}#map{height:370px}}
-@media(max-width:560px){.wrap{width:calc(100% - 24px)}.navlinks{gap:15px;overflow-x:auto}.navlinks a{font-size:10px}.brandname{font-size:13px}.brandtag{font-size:9px}.brandmark{height:35px;width:35px}.header-tools{gap:5px}.translate-label{display:none}.translate-wrap{padding:5px;max-width:125px}.theme-button{font-size:0;min-width:37px;padding:8px}.theme-button .theme-icon{font-size:15px}.menu-button{display:none}main{padding-top:21px}.kpi{padding:12px}.kpi strong{font-size:23px}.kpi small{font-size:9px}.filters{padding:9px}.search{flex-basis:100%;min-width:100%}.control{flex:1;min-width:0}.analytics{grid-template-columns:1fr}.analytics>.panel:last-child{grid-column:auto}.chart-wrap{height:225px}.chart-wrap canvas{max-height:204px}.source-grid{grid-template-columns:1fr 1fr}.section-title{align-items:flex-start;flex-direction:column}.section-title h2{font-size:19px}.signal-card{grid-template-columns:31px minmax(0,1fr) auto;padding:8px;gap:8px}.signal-symbol{width:29px;height:29px}.signal-detail{padding:14px}.map-foot{align-items:flex-start;flex-direction:column}}
+@media(max-width:850px){.region-explorer-layout{grid-template-columns:1fr}.region-explorer-list{max-height:380px}.region-explorer-tools{grid-template-columns:1fr 1fr}.region-explorer-tools #regionSearch{grid-column:1/-1}.nav{padding:10px 0;flex-wrap:wrap}.navlinks{order:3;width:100%;justify-content:flex-start;border-top:1px solid var(--line);padding-top:8px}.header-tools{margin-left:auto}.layout,.flow-layout,.records-layout{grid-template-columns:1fr}.hero{flex-direction:column}.hero-right{align-items:flex-start}.updated{text-align:left}.kpis{grid-template-columns:1fr 1fr}.region-summary{padding:14px}.map{height:360px}#map{height:370px}}
+@media(max-width:560px){.region-explorer-tools{grid-template-columns:1fr}.region-explorer-tools #regionSearch{grid-column:auto}.region-option{align-items:flex-start}.region-option-stats{max-width:110px}.region-profile-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.region-detail-head{flex-direction:column}.region-data-row{align-items:flex-start}.region-data-row b{white-space:normal;text-align:right}.wrap{width:calc(100% - 24px)}.navlinks{gap:15px;overflow-x:auto}.navlinks a{font-size:10px}.brandname{font-size:13px}.brandtag{font-size:9px}.brandmark{height:35px;width:35px}.header-tools{gap:5px}.translate-label{display:none}.translate-wrap{padding:5px;max-width:125px}.theme-button{font-size:0;min-width:37px;padding:8px}.theme-button .theme-icon{font-size:15px}.menu-button{display:none}main{padding-top:21px}.kpi{padding:12px}.kpi strong{font-size:23px}.kpi small{font-size:9px}.filters{padding:9px}.search{flex-basis:100%;min-width:100%}.control{flex:1;min-width:0}.analytics{grid-template-columns:1fr}.analytics>.panel:last-child{grid-column:auto}.chart-wrap{height:225px}.chart-wrap canvas{max-height:204px}.source-grid{grid-template-columns:1fr 1fr}.section-title{align-items:flex-start;flex-direction:column}.section-title h2{font-size:19px}.signal-card{grid-template-columns:31px minmax(0,1fr) auto;padding:8px;gap:8px}.signal-symbol{width:29px;height:29px}.signal-detail{padding:14px}.map-foot{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -94,6 +140,20 @@ main{padding:27px 0 48px}.hero{display:flex;justify-content:space-between;align-
 <div id="regionSummary" class="region-summary"><div class="empty"><strong>No market selected</strong>Choose a marker on the map to inspect country context and related trade records.</div></div>
 </aside>
 </div>
+
+<section id="regional-explorer" class="section">
+<div class="section-title"><div><h2>Explore S³ by country</h2><p>Browse every country available in the current snapshot. Inspect economic context, reported import products, trade-partner observations, and research signals with matching author-affiliation metadata.</p></div><span id="regionExplorerCount" class="tag tag-accent">Loading country coverage…</span></div>
+<div class="region-explorer-tools">
+<input id="regionSearch" class="control" type="search" placeholder="Search country, ISO code, capital or region…" aria-label="Search available countries">
+<select id="regionGroupFilter" class="control" aria-label="Filter by World Bank region"><option value="all">All World Bank regions</option></select>
+<select id="regionEvidenceFilter" class="control" aria-label="Filter by available evidence"><option value="all">All available countries</option><option value="trade">Has trade data</option><option value="indicators">Has economic indicators</option><option value="research">Has research-affiliation matches</option><option value="mapped">Has map coordinates</option></select>
+</div>
+<div class="region-explorer-layout">
+<section class="panel"><div class="panel-head"><div><h2>Available countries</h2><p>Choose a country to open its S³ profile</p></div><span class="tag">Dataset-driven</span></div><div id="regionExplorerList" class="region-explorer-list"><div class="empty"><strong>Loading countries</strong>The country list will appear when the snapshot has loaded.</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Country explorer</h2><p>Evidence available for the selected country</p></div><span class="tag tag-accent">S³ profile</span></div><div id="regionExplorerDetail" class="region-explorer-detail"><div class="empty"><strong>Select a country</strong>Choose a country from the list to explore its indicators, trade products, partner observations and related research metadata.</div></div></section>
+</div>
+<div class="region-data-footnote" style="margin-top:10px">Coverage note: source data currently supports country-level profiles and World Bank regional groupings. Province, city or district-level smart-specialization profiles require additional subnational datasets and will not be inferred from country indicators.</div>
+</section>
 
 <section id="analytics" class="section">
 <div class="section-title"><div><h2>Analytics overview</h2><p>Charts are calculated from retrieved snapshots; collection coverage is selective, not a complete census.</p></div><span id="analyticsMeta" class="small">Waiting for records</span></div>
