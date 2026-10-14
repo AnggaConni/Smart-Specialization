@@ -46,6 +46,34 @@ main{padding:27px 0 48px}.hero{display:flex;justify-content:space-between;align-
 .boundary-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0}.boundary-controls label{font-size:9px;font-weight:800;color:var(--muted)}.boundary-controls .control{font-size:9px;padding:6px;min-height:31px}
 .area-selection-banner{margin:8px 0 0;padding:9px 10px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-soft);font-size:10px;color:var(--ink);line-height:1.55}
 .area-selection-banner strong{display:block;font:800 11px Manrope;margin-bottom:3px}.area-selection-banner small{display:block;color:var(--muted);margin-top:5px}
+
+.policy-lab-layout{display:grid;grid-template-columns:minmax(260px,.72fr) minmax(0,1.28fr);gap:13px;align-items:start}
+.policy-form{padding:14px;display:grid;gap:7px}
+.policy-form label{font:800 10px Manrope;color:var(--muted);margin-top:5px}
+.policy-question{resize:vertical;min-height:84px;line-height:1.5}
+.policy-form-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.button-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.policy-status{border-top:1px solid var(--line);margin-top:5px;padding-top:10px;color:var(--muted);font-size:10px;line-height:1.55}
+.policy-brief-output{padding:15px;min-width:0}
+.policy-brief-title{font:850 21px/1.2 Manrope;letter-spacing:-.04em;margin:3px 0 7px;overflow-wrap:anywhere}
+.policy-brief-meta{font-size:10px;line-height:1.65;color:var(--muted);margin-bottom:13px}
+.policy-alert{padding:10px 12px;background:var(--panel-soft);border:1px solid var(--line);border-radius:8px;font-size:10px;line-height:1.65;margin:9px 0}
+.policy-output-section{margin-top:15px}
+.policy-output-section h3{font:850 12px Manrope;margin:0 0 7px}
+.policy-output-section p,.policy-output-section li{font-size:10px;line-height:1.65;color:var(--muted)}
+.policy-evidence-list{display:grid;gap:7px}
+.policy-evidence-card{border:1px solid var(--line);border-radius:8px;padding:10px;min-width:0}
+.policy-evidence-card strong{display:block;font:800 10px/1.5 Manrope;overflow-wrap:anywhere}
+.policy-evidence-card p{margin:5px 0 0}
+.policy-evidence-card a{font-size:10px;font-weight:800}
+.policy-pill-row{display:flex;flex-wrap:wrap;gap:5px}
+.policy-pill{border:1px solid var(--line);background:var(--panel-soft);padding:5px 7px;border-radius:6px;font-size:9px;color:var(--ink)}
+.policy-option{border-left:3px solid var(--accent);background:var(--panel-soft);border-radius:0 8px 8px 0;padding:10px 11px;margin:7px 0}
+.policy-option strong{display:block;font:800 10px/1.5 Manrope}
+.policy-option p{margin:5px 0 0}
+.policy-governance-note{margin-top:12px;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px 14px;font-size:10px;line-height:1.65;color:var(--muted)}
+.policy-governance-note strong{color:var(--ink)}
+
 .news-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr);gap:13px}
 .news-tools{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--line)}.news-tools .control:first-child{flex:1;min-width:120px}.news-tools .control:last-child{max-width:210px}
 .news-list{display:grid;gap:0;max-height:700px;overflow:auto}
@@ -110,8 +138,8 @@ button.region-flow-button:hover,button.region-research-row:hover{background:var(
 .region-empty-note{font-size:10px;color:var(--muted);padding:10px;border:1px dashed var(--line);border-radius:8px;margin:0}
 .region-data-footnote{font-size:9px;line-height:1.6;color:var(--muted)}
 
-@media(max-width:1100px){.news-layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.navlinks{gap:11px}.navlinks a{font-size:11px}.analytics{grid-template-columns:1fr 1fr}.analytics>.panel:last-child{grid-column:1/-1}.source-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr)}}
-@media(max-width:850px){.news-layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.map-canvas-wrap{height:370px}.region-explorer-layout{grid-template-columns:1fr}.region-explorer-list{max-height:380px}.region-explorer-tools{grid-template-columns:1fr 1fr}.region-explorer-tools #regionSearch{grid-column:1/-1}.nav{padding:10px 0;flex-wrap:wrap}.navlinks{order:3;width:100%;justify-content:flex-start;border-top:1px solid var(--line);padding-top:8px}.header-tools{margin-left:auto}.layout,.flow-layout,.records-layout{grid-template-columns:1fr}.hero{flex-direction:column}.hero-right{align-items:flex-start}.updated{text-align:left}.kpis{grid-template-columns:1fr 1fr}.region-summary{padding:14px}.map{height:360px}.map-canvas-wrap{height:370px}}
+@media(max-width:1100px){.policy-lab-layout{grid-template-columns:1fr}.news-layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.navlinks{gap:11px}.navlinks a{font-size:11px}.analytics{grid-template-columns:1fr 1fr}.analytics>.panel:last-child{grid-column:1/-1}.source-grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr)}}
+@media(max-width:850px){.policy-lab-layout{grid-template-columns:1fr}.news-layout{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.map-canvas-wrap{height:370px}.region-explorer-layout{grid-template-columns:1fr}.region-explorer-list{max-height:380px}.region-explorer-tools{grid-template-columns:1fr 1fr}.region-explorer-tools #regionSearch{grid-column:1/-1}.nav{padding:10px 0;flex-wrap:wrap}.navlinks{order:3;width:100%;justify-content:flex-start;border-top:1px solid var(--line);padding-top:8px}.header-tools{margin-left:auto}.layout,.flow-layout,.records-layout{grid-template-columns:1fr}.hero{flex-direction:column}.hero-right{align-items:flex-start}.updated{text-align:left}.kpis{grid-template-columns:1fr 1fr}.region-summary{padding:14px}.map{height:360px}.map-canvas-wrap{height:370px}}
 @media(max-width:560px){.region-detail-actions{width:100%;min-width:0;align-items:stretch}.boundary-controls{justify-content:flex-start}.boundary-controls .control{max-width:none;flex:1}.news-tools{flex-direction:column}.news-tools .control:last-child{max-width:none}.region-explorer-tools{grid-template-columns:1fr}.region-explorer-tools #regionSearch{grid-column:auto}.region-option{align-items:flex-start}.region-option-stats{max-width:110px}.region-profile-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.region-detail-head{flex-direction:column}.region-data-row{align-items:flex-start}.region-data-row b{white-space:normal;text-align:right}.wrap{width:calc(100% - 24px)}.navlinks{gap:15px;overflow-x:auto}.navlinks a{font-size:10px}.brandname{font-size:13px}.brandtag{font-size:9px}.brandmark{height:35px;width:35px}.header-tools{gap:5px}.translate-label{display:none}.translate-wrap{padding:5px;max-width:125px}.theme-button{font-size:0;min-width:37px;padding:8px}.theme-button .theme-icon{font-size:15px}.menu-button{display:none}main{padding-top:21px}.kpi{padding:12px}.kpi strong{font-size:23px}.kpi small{font-size:9px}.filters{padding:9px}.search{flex-basis:100%;min-width:100%}.control{flex:1;min-width:0}.analytics{grid-template-columns:1fr}.analytics>.panel:last-child{grid-column:auto}.chart-wrap{height:225px}.chart-wrap canvas{max-height:204px}.source-grid{grid-template-columns:1fr 1fr}.section-title{align-items:flex-start;flex-direction:column}.section-title h2{font-size:19px}.signal-card{grid-template-columns:31px minmax(0,1fr) auto;padding:8px;gap:8px}.signal-symbol{width:29px;height:29px}.signal-detail{padding:14px}.map-foot{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
@@ -119,7 +147,7 @@ button.region-flow-button:hover,button.region-research-row:hover{background:var(
 <header>
 <div class="wrap nav">
 <a class="brand" href="index.html" aria-label="Smart Specialization home"><span class="brandmark">S³</span><span><span class="brandname">Smart Specialization</span><br><span class="brandtag">Strategic Radar</span></span></a>
-<nav class="navlinks" aria-label="Main navigation"><a href="index.html">Home</a><a href="calculator.html">Calculator</a><a href="#analytics">Analytics</a><a href="#trade-flows">Trade flows</a><a href="#trade-products">Products</a><a href="#signals-section">Research</a><a href="#news-section">News &amp; Policy</a></nav>
+<nav class="navlinks" aria-label="Main navigation"><a href="index.html">Home</a><a href="calculator.html">Calculator</a><a href="#analytics">Analytics</a><a href="#trade-flows">Trade flows</a><a href="#trade-products">Products</a><a href="#signals-section">Research</a><a href="#news-section">News &amp; Policy</a><a href="#policy-support">Policy support</a></nav>
 <div class="header-tools">
 <div class="translate-wrap"><span class="translate-label">Translate</span><div id="google_translate_element" aria-label="Translate page language"><span class="small">English</span></div></div>
 <button type="button" id="themeToggle" class="theme-button" aria-label="Switch to dark theme"><span class="theme-icon" id="themeIcon">☾</span> <span id="themeLabel">Dark</span></button>
@@ -173,6 +201,30 @@ button.region-flow-button:hover,button.region-research-row:hover{background:var(
 <section class="panel"><div class="panel-head"><div><h2>Country explorer</h2><p>Evidence available for the selected country</p></div><span class="tag tag-accent">S³ profile</span></div><div id="regionExplorerDetail" class="region-explorer-detail"><div class="empty"><strong>Select a country</strong>Choose a country from the list to explore its indicators, trade products, partner observations and related research metadata.</div></div></section>
 </div>
 <div class="region-data-footnote" style="margin-top:10px">Coverage note: source data currently supports country-level profiles and World Bank regional groupings. Province, city or district-level smart-specialization profiles require additional subnational datasets and will not be inferred from country indicators.</div>
+</section>
+
+<section id="policy-support" class="section">
+<div class="section-title"><div><h2>Policy Support Lab</h2><p>Build a source-linked evidence brief for government, UN Country Teams, and development partners. This is a transparent drafting aid—not an automated policy recommendation.</p></div><span class="tag tag-accent">Decision support · human review</span></div>
+<div class="policy-lab-layout">
+<section class="panel policy-builder">
+<div class="panel-head"><div><h2>Frame the policy question</h2><p>Choose a geography, theme and decision audience</p></div><span class="tag">Evidence-led</span></div>
+<div class="policy-form">
+<label for="policyCountry">Country / available market</label><select id="policyCountry" class="control"><option value="">Load country data first…</option></select>
+<label for="policySector">Policy focus</label><select id="policySector" class="control">
+<option>Regional Innovation</option><option>Advanced Manufacturing</option><option>Green Industry</option><option>Agri-food</option><option>Trade &amp; Logistics</option><option>Digital Economy</option><option>Skills &amp; Workforce</option>
+</select>
+<label for="policyAudience">Intended audience</label><select id="policyAudience" class="control"><option>Government policy team</option><option>UN Country Team / Resident Coordinator Office</option><option>UN agency programme team</option><option>Development partner / donor</option><option>Regional organization</option></select>
+<label for="policyHorizon">Planning horizon</label><select id="policyHorizon" class="control"><option value="0–12 months">0–12 months · immediate design / pilot</option><option value="1–3 years">1–3 years · programme cycle</option><option value="3–5 years">3–5 years · structural transition</option></select>
+<label for="policyQuestion">Decision question</label><textarea id="policyQuestion" class="control policy-question" rows="3" placeholder="What decision should this brief help the team examine?">Which sector capabilities and policy constraints warrant further validation before choosing an intervention?</textarea>
+<div class="policy-form-actions"><button type="button" id="generatePolicyBrief" class="button button-primary">Build evidence brief</button><button type="button" id="downloadPolicyBrief" class="button" disabled>↓ Download Markdown</button></div>
+<div id="policyBriefStatus" class="policy-status" role="status">Select the scope, then build a brief from the currently published snapshot.</div>
+</div></section>
+<section class="panel policy-output-panel">
+<div class="panel-head"><div><h2>Evidence-to-policy brief</h2><p>Source links, candidate options, SDG alignment and evidence gaps</p></div><span class="tag tag-accent">Draft</span></div>
+<div id="policyBriefOutput" class="policy-brief-output"><div class="empty"><strong>No brief generated yet</strong>Choose a country and policy theme. The brief will use available research, trade records, country indicators and news leads, and label gaps rather than filling them with assumptions.</div></div>
+</section>
+</div>
+<div class="policy-governance-note"><strong>Public-sector safeguard:</strong> use this as a starting point for analyst deliberation. Validate against national plans, legal mandates, budget ceilings, distributional impacts, climate/environment safeguards, stakeholder consultations and official SDG indicators before making decisions.</div>
 </section>
 
 <section id="analytics" class="section">
