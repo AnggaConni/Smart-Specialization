@@ -1,96 +1,120 @@
 # S³ Smart Specialization
 
-An evidence-informed workspace for exploring regional capabilities, research signals, trade patterns, and possible strategic specialization opportunities.
+**S³ (Smart Specialization Signals & Strategy)** is a lightweight, evidence-informed workspace for exploring regional capabilities, research signals, trade patterns, and possible specialization opportunities.
 
-## Pages
+## Live pages
 
-- [Landing page](https://anggaconni.github.io/Smart-Specialization/) — project overview and navigation.
-- [Specialization Calculator](https://anggaconni.github.io/Smart-Specialization/calculator.html) — structured assessment and reporting.
-- [Strategic Radar](https://anggaconni.github.io/Smart-Specialization/radar.html) — interactive research signals, analytics, country map, product-market data, and reported trade-flow network.
+- **[S³ Landing page](https://anggaconni.github.io/Smart-Specialization/)** — project overview and navigation.
+- **[Specialization Calculator](https://anggaconni.github.io/Smart-Specialization/calculator.html)** — structured assessment and reporting.
+- **[Strategic Radar](https://anggaconni.github.io/Smart-Specialization/radar.html)** — analytics, regional explorer, interactive map, reported trade products and partner links, research records, and news/policy discovery.
 
-The Radar starts in the bright theme with English as the page language. The header switches to dark theme and provides the Google Translate language widget. Theme choice is stored locally in the browser.
+The Radar uses **English by default**, starts in the **bright theme**, and offers a dark-theme switch. The browser remembers the theme. The header contains a Google Translate widget. The Leaflet map supports dragging, mouse-wheel zoom and fullscreen mode. The regional explorer can request administrative boundaries when a country and ADM level are selected.
 
-## S³ Radar data pipeline
+## What is connected today?
 
-The dashboard reads data/radar-data.json. The collection job stores a source-attributed snapshot, allowing GitHub Pages to serve it without a backend service.
+### Data APIs used by the weekly collector
 
-### Data providers
+| Provider / endpoint | What S³ uses it for | Access model |
+|---|---|---|
+| [OpenAlex Works API](https://docs.openalex.org/) | Scholarly metadata, publication dates, author affiliations where supplied, abstracts where supplied, and citation counts. | Basic queries work without a key. A free API key raises the usage budget; optional key is read from the **OPENALEX_API_KEY** Actions secret. |
+| [Crossref REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) | DOI and publisher-deposited bibliographic metadata; deduplication with OpenAlex results. | Public API, no signup/key required. The collector supports a contact email via **S3_CONTACT_EMAIL** or the configuration file to use the recommended polite pool. |
+| [World Bank Indicators API v2](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392) | Country names, capital/reference coordinates, region and income group, GDP, GDP per capita, population, and trade as a share of GDP. | Public API; no API key required. Missing observations remain unknown, not zero. |
+| [UN Comtrade API](https://uncomtrade.org/docs/un-comtrade-api/) | Selected product-level import series and bilateral partner breakdowns from reporting importers. | A registered **free Basic Individual** account can request a subscription key, with free-tier limits. Without a valid key, S³ attempts the restricted public preview endpoint. Preview results may be truncated. |
+| [GDELT DOC 2.0](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) | Source-linked news leads for configured themes: regional innovation, manufacturing, green industry, agri-food, trade/logistics, digital economy, and skills. | Public API; no API key required. The weekly pipeline searches a rolling 7-day window. Results are leads for human review—not verified events or facts. |
 
-- **OpenAlex** — scholarly work metadata, publication dates, authorship affiliations where supplied, abstract metadata where available, and citation counts.
-- **Crossref** — DOI and publisher-deposited bibliographic metadata for additional research discovery and deduplication.
-- **World Bank Indicators API** — country names, capital reference coordinates, GDP, GDP per capita, population, and trade as a share of GDP.
-- **UN Comtrade** — selected product-level import observations and bilateral partner-level import relationships.
+The collector writes a source-attributed snapshot to **data/radar-data.json**. The page reads this snapshot; it does not run the full collection pipeline from each visitor's browser.
 
-These providers answer different questions and should not be treated as equivalent forms of evidence. Research records are not proof of commercial impact. Reported imports are not retail sales, profit, or confirmed orders. Capital coordinates are reference points rather than exact factory, port, or production locations.
+### Geospatial and map services used in the browser
 
-### Refresh schedule
+| Provider / tool | Use | Cost, key and caveats |
+|---|---|---|
+| [geoBoundaries API](https://www.geoboundaries.org/api.html) | On-demand ADM1/ADM2 province, state or district/county polygons when a user chooses a country and boundary level in the Regional Explorer. | Public API with no key for its public endpoints. Availability is not guaranteed. Read the returned boundary licence, source and year metadata; licences can vary by boundary/source. Provide attribution. Does **not** provide local economic indicators by itself. |
+| [CARTO Basemaps](https://www.carto.com/basemaps/apikey/index.html) | Light/dark map tiles when a configured key is available. | Requires a key. CARTO currently documents a free allowance of up to **5 million requests/month for non-commercial use** and **1 million/month for commercial use**, subject to its terms. The browser key is visible to visitors and must be restricted by website referrer. |
+| [OpenStreetMap tile service](https://operations.osmfoundation.org/policies/tiles/) | Fallback basemap if the CARTO browser configuration is absent or CARTO tiles fail. | No API key for standard tiles, but the public tile service is not an unlimited bulk/offline tile API. Keep attribution visible and follow its usage policy. For high-volume production use, consider a provider with an appropriate service plan. |
+| [Leaflet](https://leafletjs.com/) | Interactive map, markers, GeoJSON polygons, popups and trade-link overlays. | Open-source JavaScript mapping library; not a statistical-data API. |
+| [Chart.js](https://www.chartjs.org/) | Research, sector and trade charts. | Open-source visualization library; not a data API. |
+| [Google Translate web widget](https://translate.google.com/) | Optional page translation from the header. | A third-party interface integration, not a translation-data API. Availability and behavior can change; dynamic map popups and chart labels may not always be translated consistently. |
 
-The workflow **S3 Radar weekly data refresh** runs every Monday at **09:17 WIB** and can also be started manually:
+**CARTO key setup:** the refresh workflow creates **data/map-config.json** from the repository Actions **variable** named **CARTO_API_KEY**. Do not hard-code the key into HTML or JavaScript. Since the value is delivered to a public browser, it is not a private credential. Restrict it to the deployed GitHub Pages referrer in the CARTO dashboard before adding it as a repository variable. An existing Actions secret by itself cannot be read by the public frontend without intentionally exposing it through a generated public config.
+
+**UN Comtrade setup:** the workflow reads the Actions secret **UN_COMTRADE_API_KEY** (or the fallback name **COMTRADE_API_KEY**). If Comtrade rejects the key, the pipeline falls back to preview mode and labels the snapshot accordingly. If trade counts are small, check the workflow log and validate that the key is enabled for the API endpoint this collector uses.
+
+**Optional OpenAlex key:** add **OPENALEX_API_KEY** under repository **Settings → Secrets and variables → Actions → Secrets** if you want the free-key budget. It is optional; the collector supports basic access without it.
+
+## Regional Explorer: what can and cannot be inferred
+
+The country explorer combines World Bank indicators, UN Comtrade product/partner records, and research records whose author-affiliation country metadata matches the selected country.
+
+The map can show administrative geometries from geoBoundaries at ADM1 or ADM2 when the user requests them. Polygon selection identifies the administrative unit and displays the boundary's source, licence and represented year where supplied.
+
+Important limits:
+
+- Country-level GDP/population/trade indicators are **not** automatically distributed to provinces or districts.
+- A polygon is a boundary, not evidence of local economic output, a particular factory, a supplier, a shipment route or a commercial opportunity.
+- Research-affiliation matches reflect metadata coverage; they are not a full measure of research activity about a country.
+- Trade links follow partner origin reported by the importing country. They are not verified company-to-company relationships.
+- The geoBoundaries request happens when a user requests an ADM level; if the public endpoint, download host or browser CORS/network access fails, existing country/trade data remains usable.
+
+## Additional free/open APIs for future S³ expansion
+
+The options below are documented for future work; **they are not all integrated into the active collector yet**. Free access does not imply unlimited requests, universal coverage, or unrestricted reuse. Confirm terms, licences, API limits and attribution before enabling recurring jobs.
+
+| API / dataset | Potential S³ use | Free access and current integration status |
+|---|---|---|
+| [World Bank Official Boundaries](https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries) | Alternative Admin 0/1/2 polygons and region attributes. | Public dataset, CC BY 4.0; **candidate, not currently used**. The current on-demand polygon tool is geoBoundaries. |
+| [OECD SDMX / Data Explorer API](https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html) | Regional GDP, gross value added, employment and productivity for regions covered by OECD datasets. | API access is free subject to OECD terms and rate limits; geographic coverage is not worldwide. **Not integrated yet.** |
+| [Eurostat APIs](https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction) | EU regional (NUTS) statistics, including economic structure and labour data. | REST access is free of charge; datasets have their own dimensions and definitions. **Not integrated yet.** |
+| [FAOSTAT API developer portal](https://www.fao.org/statistics/highlights-archive/highlights-detail/faostat-launches-a-new-api-developer-portal-to-make-data-access-easier/en) | Agriculture, production, food balances and related specialisation context. | FAO announced free programmatic API access in April 2026 with coverage of more than 245 countries and territories. Check the portal's endpoint documentation before building a collector. **Not integrated yet.** |
+| [UNIDO Statistics Portal API](https://stat.unido.org/unido-statistics-portal-api) | Manufacturing structure, industry, national accounts and manufacturing trade. | API documentation is public; do not assume every dataset or use has identical terms/limits. **Access conditions need checking; not integrated yet.** |
+| [OpenAQ API](https://docs.openaq.org/) | Air-quality and environmental context for green-transition exploration. | API key required; free use is subject to tier limits. Environmental observations are not direct indicators of industrial competitiveness. **Not integrated yet.** |
+| [GBIF API](https://www.gbif.org/developer/summary) | Biodiversity observations and ecosystem context, where relevant to place-based opportunities. | Public occurrence API with responsible-use limits; individual datasets retain their licences. **Not integrated yet.** |
+
+**Suggested expansion order:** (1) continue testing geoBoundaries ADM1/ADM2 display; (2) add regional indicators only where authoritative data and region codes align; (3) add FAOSTAT/UNIDO datasets for sector-specific evidence; (4) add OECD/Eurostat for covered regions; (5) expand the GDELT topic registry carefully. Preserve each record's source, date, geography, coverage, licence and uncertainty.
+
+## Weekly refresh and manual run
+
+The workflow **S3 Radar weekly data refresh** is scheduled for every Monday at **09:17 WIB** and can also be run manually:
 
 1. Open the repository's **Actions** tab.
 2. Select **S3 Radar weekly data refresh**.
-3. Choose **Run workflow**.
-4. Open the run and review the collector and validation steps.
+3. Select **Run workflow**.
+4. Review the collector, JSON validation, and publish/commit steps.
 
-The first run publishes data/radar-data.json if the source collectors return usable data. The dashboard's **Reload snapshot** button reloads the latest published JSON; it does not trigger an upstream collection run.
+The dashboard's **Reload snapshot** button downloads the latest published JSON; it does not trigger collection. If an API fails, the pipeline records warnings and attempts to retain the previous usable snapshot rather than publishing an empty one.
 
-### CARTO basemap key for the browser map
+## Local development
 
-The map reads `data/map-config.json`, generated by the refresh workflow from the repository **Actions variable** named `CARTO_API_KEY`. This is intentionally a browser-facing key: visitors can see it in their tile requests, so it must not be treated as a private server credential. Restrict the CARTO key's allowed website referrer to `anggaconni.github.io` in the CARTO Basemaps dashboard before adding it as a repository variable (**Settings → Secrets and variables → Actions → Variables**). Do not hard-code the key into `radar.js` or `radar.html`.
-
-The existing `CARTO_API_KEY` Actions secret alone cannot be read as a public frontend configuration without exposing it. Copy the same referrer-restricted browser key to the repository variable with the same name. If the variable is missing, the map uses OpenStreetMap as a fallback. Keep visible OpenStreetMap/CARTO attribution on the map.
-
-### Optional UN Comtrade API key
-
-The collector supports the repository Actions secret UN_COMTRADE_API_KEY; it also recognizes COMTRADE_API_KEY as a fallback secret name. Add it in **Settings → Secrets and variables → Actions** if an authenticated allowance is available.
-
-Without a key, the collector uses UN Comtrade's public preview endpoint, which is rate-limited and can be truncated. The source status is displayed in the dashboard. The absence of a trade record must not be interpreted as zero trade or no opportunity.
-
-### Local development
-
-Requires Python 3.11+ and Node.js for the dashboard JavaScript syntax check.
+Requires Python 3.11+ and Node.js.
 
     python -m pip install -r requirements.txt
     python -m unittest discover -s tests -v
     node --check radar.js
     python -m http.server 8080
 
-Open http://localhost:8080. For the dashboard to display current data, run python pipeline/collect_radar.py and ensure the resulting snapshot is in data/radar-data.json.
+Open http://localhost:8080. For current data, run python pipeline/collect_radar.py and ensure data/radar-data.json has been generated. geoBoundaries polygons are requested from its public API when needed by the browser.
 
 ## Repository layout
 
 - index.html — landing page.
 - calculator.html — specialization calculator.
-- radar.html — responsive dashboard shell, theme switch, and translation control.
-- radar.js — map, interactive flow view, filters, source records, charts, and CSV export.
-- pipeline/collect_radar.py — research, country-context, and trade data collector.
-- config/radar_sources.json — topic queries, reporting markets, and collection parameters.
-- data/radar-data.json — published snapshot used by GitHub Pages.
-- tests/ — transformation and dashboard-integration checks.
-- .github/workflows/refresh-radar.yml — weekly/manual collection and snapshot publishing.
-- .github/workflows/ci.yml — unit tests, DOM integration checks, JavaScript syntax checks, and JSON validation.
+- radar.html — responsive dashboard, map controls, themes and regional/news sections.
+- radar.js — map, geoBoundaries overlay, filters, signal/news views, charts, regional profiles and CSV export.
+- pipeline/collect_radar.py — OpenAlex, Crossref, World Bank, UN Comtrade and GDELT collectors.
+- config/radar_sources.json — markets, topic searches and collection parameters.
+- data/radar-data.json — weekly snapshot consumed by GitHub Pages.
+- data/map-config.json — generated browser map-provider configuration; a restricted browser CARTO key may be public in this file.
+- tests/ — data transformation and dashboard integration tests.
+- .github/workflows/refresh-radar.yml — weekly/manual collection and publishing.
+- .github/workflows/ci.yml — tests, HTML/DOM checks, JSON validation and JavaScript syntax checks.
 
-## Additional free/open API candidates for expanding S³
+## Interpretation and responsible use
 
-These are candidates for later integration. Review each provider's current terms, attribution rules, coverage, and rate limits before scheduling a collector.
+- News results are source-discovery leads. Open the publisher's original page and corroborate claims before treating them as evidence.
+- Research records are bibliographic discoveries, not proof of market demand or commercial impact.
+- UN Comtrade values are reported imports, not retail sales, revenue, profit or confirmed orders.
+- GDELT source-country metadata does not guarantee that the reported event occurred in that country.
+- Country reference coordinates generally point to capitals, not factories, ports or production zones.
+- Discovery/freshness scores are triage aids, not validated impact, risk or investment scores.
+- Respect API terms, rate limits, attribution requirements and the rights of source publishers. The collector stores source-linked metadata rather than republishing full article text.
 
-- **Subnational boundaries — [World Bank Official Boundaries](https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries):** public Admin 0, Admin 1, and Admin 2 boundary files in formats including GeoJSON, with CC BY 4.0 licensing. This can add province/district shapes to the map; it does not itself provide local GDP or specialization indicators. Cite the boundary source and check any display requirements. [Dataset and license](https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries).
-- **Alternative administrative polygons — [geoBoundaries API](https://www.geoboundaries.org/api.html):** machine-readable metadata and simplified GeoJSON for ADM0–ADM5. The `gbOpen` release is CC BY 4.0 with attribution; endpoint availability is not guaranteed, so cache boundaries in the repository rather than requesting them on every page view. [API documentation](https://www.geoboundaries.org/api.html).
-- **Regional economic data — [OECD SDMX API](https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html):** free programmatic access, subject to OECD terms and rate limits. The regional-economy datasets include larger and smaller regions (TL2/TL3) with measures such as GDP, gross value added, employment, and productivity; coverage is not worldwide. [API guidance](https://www.oecd.org/en/data/insights/data-explainers/2024/09/api.html) · [Regional economics dataset](https://data-explorer.oecd.org/vis?df%5Bag%5D=OECD.CFE.EDS&df%5Bds%5D=dsDisseminateFinalDMZ&df%5Bid%5D=DSD_REG_ECO%40DF_ECO&df%5Bvs%5D=2.4).
-- **EU regional indicators — [Eurostat API](https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction):** public, free REST access for regional statistics, useful when exploring NUTS regions and EU comparisons.
-- **Agriculture and food systems — [FAOSTAT API portal](https://www.fao.org/statistics/highlights-archive/highlights-detail/faostat-launches-a-new-api-developer-portal-to-make-data-access-easier/en):** FAO announced a free API portal in April 2026 with data covering more than 245 countries and territories. Useful for crop production, food balance, trade, and agricultural specialization signals.
-- **Industrial structure — [UNIDO Statistics API](https://stat.unido.org/unido-statistics-portal-api):** published API endpoints for INDSTAT, IDSB, national accounts, and manufacturing trade datasets. Check the dataset-specific access and rate limits before using it for an automated public workflow.
-- **News and emerging issues — [GDELT DOC 2.0 API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/):** candidate for multilingual news searches and emerging-topic discovery. Treat its results as leads, deduplicate stories, preserve publisher links, and corroborate before scoring an S³ signal.
-- **Environment and green-transition context — [OpenAQ API](https://docs.openaq.org/):** public air-quality data, but an API key is required; the documented general-use tier is free with rate limits. Useful for environmental context, not a direct measure of industrial opportunity.
-
-**Recommended order:** (1) cache Admin 1 boundaries for regional map exploration; (2) use OECD/Eurostat where geography and data support regional comparisons; (3) add FAOSTAT and UNIDO to sector-specific indicators; (4) use GDELT for document signals. Keep all API collection in the weekly pipeline, and do not call heavy data APIs from every browser session.
-
-## Interpretation and limitations
-
-- The research pipeline retrieves bounded results per configured topic and provider; publication-month counts are the returned query results, not a census of global research.
-- The discovery score is an exploratory sorting aid based on metadata such as publication recency, citation counts, and topic matches. It is not a validated impact or investment score.
-- UN Comtrade public preview coverage may be incomplete. Trade-flow edges follow the partner origin declared in an importer's report; they do not establish an individual supplier or physical shipment route.
-- World Bank indicators have their own reporting years and missing values. Missing observations remain unknown, not zero.
-- Respect source terms, API limits, attribution requirements, and the rights of publishers. The collector focuses on API metadata rather than re-publishing full article text.
-
-Project code is distributed under the repository's MIT license. Provider datasets and API content remain subject to their respective terms.
+Project code is distributed under the repository's MIT license. Data, API responses, basemaps and third-party code remain subject to the respective providers' terms.
