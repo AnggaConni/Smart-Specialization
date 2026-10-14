@@ -1,0 +1,6 @@
+{
+  "provider": "CARTO",
+  "cartoApiKey": "",
+  "fallback": "OpenStreetMap",
+  "note": "A workflow generates the public browser config from the CARTO_API_KEY repository secret. Browser map keys are visible to site visitors and must be restricted by HTTP referrer."
+}
