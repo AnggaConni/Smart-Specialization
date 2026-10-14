@@ -69,6 +69,28 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("function useOsmFallback(message)", js)
         self.assertIn("CARTO key was rejected; OpenStreetMap fallback active", js)
 
+    def test_regional_explorer_controls_and_rendering_exist(self):
+        required = {
+            "regional-explorer", "regionSearch", "regionGroupFilter",
+            "regionEvidenceFilter", "regionExplorerList", "regionExplorerDetail",
+            "regionExplorerCount"
+        }
+        self.assertTrue(required.issubset(self.parser.ids), "Missing regional explorer DOM IDs")
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn("function renderRegionExplorer()", js)
+        self.assertIn("function renderRegionExplorerDetail(iso)", js)
+        self.assertIn("countryTradeProducts(iso)", js)
+        self.assertIn("countryTradeFlows(iso)", js)
+        self.assertIn("countryResearchSignals(iso)", js)
+        self.assertIn('renderRegionExplorer();if(state.selectedCountry', js)
+
+    def test_regional_explorer_uses_dataset_without_fabricating_subnational_values(self):
+        html = (ROOT / "radar.html").read_text(encoding="utf-8")
+        self.assertIn("every country available in the current snapshot", html)
+        self.assertIn("province, city or district-level", html)
+        self.assertIn("Has trade data", html)
+        self.assertIn("Has economic indicators", html)
+
 
 if __name__ == "__main__":
     unittest.main()
