@@ -299,7 +299,7 @@ def fetch_research(session: requests.Session, config: dict[str, Any], since: str
         "openalex": {"name": "OpenAlex", "url": "https://openalex.org/", "status": "error", "records": 0, "requests_ok": 0},
         "crossref": {"name": "Crossref", "url": "https://www.crossref.org/", "status": "error", "records": 0, "requests_ok": 0},
     }
-    email = os.getenv("OPENALEX_API_KEY", "").strip()
+    email = os.getenv("S3_CONTACT_EMAIL", "").strip()
     topics = config.get("topics", [])
     for topic in topics:
         # OpenAlex provides bibliographic metadata and abstract inverted indexes.
@@ -523,7 +523,7 @@ def build_trade_products(
     limited: list[dict[str, Any]] = []
     per_market = int(os.getenv("S3_PRODUCTS_PER_MARKET", "150"))
     for iso, rows in by_market.items():
-        limited.extend(sorted(rows, key=lambda r: r["latest_import_usd"], reverse=True)[:per_market])
+        limited.extend(sorted(rows, key=lambda r: (r["latest_year"], r["latest_import_usd"]), reverse=True)[:per_market])
     return sorted(limited, key=lambda r: r["latest_import_usd"], reverse=True)
 
 
