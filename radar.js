@@ -101,6 +101,7 @@ function selectExploreCountry(iso){
 function renderRegionExplorerDetail(iso){
  var c=getCountry(iso);if(!c||!c.iso3){$("regionExplorerDetail").innerHTML='<div class="empty"><strong>Country data unavailable</strong>Select a country present in the current snapshot.</div>';return}
  state.selectedCountry=iso;
+ document.querySelectorAll("[data-explore-country]").forEach(function(el){el.classList.toggle("active",el.dataset.exploreCountry===iso)});
  var flags=countryEvidenceFlags(c),ind=c.indicators||{},products=countryTradeProducts(iso).slice().sort(function(a,b){return (finite(b.latest_import_usd)||0)-(finite(a.latest_import_usd)||0)}).slice(0,7);
  var flows=countryTradeFlows(iso).slice().sort(function(a,b){return (finite(b.import_value_usd)||0)-(finite(a.import_value_usd)||0)}).slice(0,7);
  var signals=countryResearchSignals(iso).slice().sort(function(a,b){return String(b.publication_date||"").localeCompare(String(a.publication_date||""))}).slice(0,6);
