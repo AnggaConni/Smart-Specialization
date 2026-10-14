@@ -43,7 +43,7 @@ jobs:
           UN_COMTRADE_API_KEY: ${{ secrets.UN_COMTRADE_API_KEY || secrets.COMTRADE_API_KEY }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           S3_CONTACT_EMAIL: ${{ vars.S3_CONTACT_EMAIL }}
-          S3_REQUEST_SLEEP_SECONDS: "0.7"
+          S3_REQUEST_SLEEP_SECONDS: "1.15"
           PYTHONUNBUFFERED: "1"
         run: python pipeline/collect_radar.py
       - name: Generate public browser map configuration
