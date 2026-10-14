@@ -50,7 +50,7 @@ class RadarHtmlTests(unittest.TestCase):
         refs = set(re.findall(r'\$\("([^"]+)"\)', js))
         refs |= set(re.findall(r'getElementById\("([^"]+)"\)', js))
         # This button is injected into the region-detail panel at runtime.
-        refs.discard("focusExplorerMap")
+        refs.update({"focusExplorerMap", "boundaryLevelSelect", "loadRegionBoundaries", "selectedAdminUnitInfo", "boundaryMetadataNote"})
         self.assertFalse(refs - self.parser.ids, "Missing DOM ids: " + ", ".join(sorted(refs - self.parser.ids)))
 
     def test_dashboard_loads_external_script(self):
@@ -80,6 +80,22 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("requestFullscreen()", js)
         self.assertIn('document.addEventListener("fullscreenchange",updateFullscreenButton)', js)
         self.assertIn("invalidateSize({pan:false})", js)
+
+    def test_geoboundaries_admin_level_controls_and_fallback_are_present(self):
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn("https://www.geoboundaries.org/api/current/gbOpen/", js)
+        self.assertIn("function loadAdministrativeBoundaries(iso,level)", js)
+        self.assertIn('id="boundaryLevelSelect"', js)
+        self.assertIn("simplifiedGeometryGeoJSON", js)
+        self.assertIn("Reported licence:", js)
+
+    def test_news_policy_watch_is_connected_to_snapshot(self):
+        required = {"news-section", "newsSearch", "newsSectorFilter", "newsList", "newsCount", "kpiNews"}
+        self.assertTrue(required.issubset(self.parser.ids), "Missing GDELT news watch elements")
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn("function renderNewsSignals()", js)
+        self.assertIn("state.newsSignals=Array.isArray(payload.news_signals)", js)
+        self.assertIn('$("newsSearch").addEventListener("input",renderNewsSignals)', js)
 
     def test_regional_explorer_controls_and_rendering_exist(self):
         required = {
