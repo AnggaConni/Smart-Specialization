@@ -97,6 +97,26 @@ class RadarHtmlTests(unittest.TestCase):
         self.assertIn("state.newsSignals=Array.isArray(payload.news_signals)", js)
         self.assertIn('$("newsSearch").addEventListener("input",renderNewsSignals)', js)
 
+    def test_policy_support_lab_builds_and_exports_evidence_briefs(self):
+        required = {
+            "policy-support", "policyCountry", "policySector", "policyAudience",
+            "policyHorizon", "policyQuestion", "generatePolicyBrief",
+            "downloadPolicyBrief", "policyBriefStatus", "policyBriefOutput"
+        }
+        self.assertTrue(required.issubset(self.parser.ids), "Missing Policy Support Lab controls")
+        self.assertIn('href="#policy-support"', self.html)
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn("function generatePolicyBrief()", js)
+        self.assertIn("function downloadPolicyBrief()", js)
+        self.assertIn("Candidate options for appraisal—not recommendations", js)
+        self.assertIn("official government/UN position", js)
+        self.assertIn("function renderPolicyControls()", js)
+        self.assertIn("markPolicyBriefStale()", js)
+
+    def test_source_registry_does_not_repeat_note_when_it_is_already_card_body(self):
+        js = (ROOT / "radar.js").read_text(encoding="utf-8")
+        self.assertIn('escapeHtml(detail?info:"")', js)
+
     def test_regional_explorer_controls_and_rendering_exist(self):
         required = {
             "regional-explorer", "regionSearch", "regionGroupFilter",
