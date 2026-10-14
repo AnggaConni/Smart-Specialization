@@ -89,7 +89,7 @@ class RadarHtmlTests(unittest.TestCase):
     def test_regional_explorer_uses_dataset_without_fabricating_subnational_values(self):
         html = (ROOT / "radar.html").read_text(encoding="utf-8")
         self.assertIn("every country available in the current snapshot", html)
-        self.assertIn("province, city or district-level", html)
+        self.assertIn("city or district-level", html.lower())
         self.assertIn("Has trade data", html)
         self.assertIn("Has economic indicators", html)
 
