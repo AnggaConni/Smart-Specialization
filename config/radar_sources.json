@@ -78,6 +78,6 @@
       "query": "(\"future skills\" OR \"workforce transformation\" OR \"vocational training\")"
     }
   ],
-  "gdelt_max_records_per_query": 30,
-  "gdelt_pause_seconds": 0.6
+  "gdelt_max_records_per_query": 20,
+  "gdelt_pause_seconds": 3
 }
