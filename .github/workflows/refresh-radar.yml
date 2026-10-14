@@ -41,6 +41,7 @@ jobs:
       - name: Collect S3 research, trade and country signals
         env:
           UN_COMTRADE_API_KEY: ${{ secrets.UN_COMTRADE_API_KEY || secrets.COMTRADE_API_KEY }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           S3_CONTACT_EMAIL: ${{ vars.S3_CONTACT_EMAIL }}
           S3_REQUEST_SLEEP_SECONDS: "0.7"
           PYTHONUNBUFFERED: "1"
