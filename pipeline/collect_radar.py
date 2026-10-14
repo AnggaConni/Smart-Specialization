@@ -928,7 +928,7 @@ def main() -> int:
     signal_source_count = len(signals)
     trade_mode = trade_status.get("mode") or "unknown"
     all_errors = [item for item in warnings if item]
-    if trade_status.get("status") in {"error", "stale-fallback"} or research_status["openalex"]["status"] == "error" or research_status["crossref"]["status"] == "error":
+    if trade_status.get("status") in {"error", "stale-fallback"} or research_status["openalex"]["status"] == "error" or research_status["crossref"]["status"] == "error" or gdelt_status.get("status") in {"error", "stale-fallback"}:
         overall_status = "partial-refresh"
     elif trade_mode == "preview-limited":
         overall_status = "preview-limited-trade"
@@ -950,6 +950,8 @@ def main() -> int:
                 "UN Comtrade preview mode is rate-limited and may return truncated coverage.",
                 "World Bank coordinates are capital/reference points, not precise production or trade locations.",
                 "Scores are exploratory triage aids and should not be read as investment recommendations.",
+                "GDELT records are news discovery leads only; original publisher pages must be checked and claims corroborated before interpretation.",
+                "Subnational polygons loaded from geoBoundaries describe administrative geometry; they do not supply province/district economic indicators.";
             ],
             "sources": [
                 research_status["openalex"],
