@@ -1,1 +1,75 @@
-# SmartSpecializationAIreport
+# S³ Smart Specialization
+
+An evidence-informed workspace for exploring regional capabilities, research signals, trade patterns, and possible strategic specialization opportunities.
+
+## Pages
+
+- [Landing page](https://anggaconni.github.io/Smart-Specialization/) — project overview and navigation.
+- [Specialization Calculator](https://anggaconni.github.io/Smart-Specialization/calculator.html) — structured assessment and reporting.
+- [Strategic Radar](https://anggaconni.github.io/Smart-Specialization/radar.html) — interactive research signals, analytics, country map, product-market data, and reported trade-flow network.
+
+The Radar starts in the bright theme with English as the page language. The header switches to dark theme and provides the Google Translate language widget. Theme choice is stored locally in the browser.
+
+## S³ Radar data pipeline
+
+The dashboard reads data/radar-data.json. The collection job stores a source-attributed snapshot, allowing GitHub Pages to serve it without a backend service.
+
+### Data providers
+
+- **OpenAlex** — scholarly work metadata, publication dates, authorship affiliations where supplied, abstract metadata where available, and citation counts.
+- **Crossref** — DOI and publisher-deposited bibliographic metadata for additional research discovery and deduplication.
+- **World Bank Indicators API** — country names, capital reference coordinates, GDP, GDP per capita, population, and trade as a share of GDP.
+- **UN Comtrade** — selected product-level import observations and bilateral partner-level import relationships.
+
+These providers answer different questions and should not be treated as equivalent forms of evidence. Research records are not proof of commercial impact. Reported imports are not retail sales, profit, or confirmed orders. Capital coordinates are reference points rather than exact factory, port, or production locations.
+
+### Refresh schedule
+
+The workflow **S3 Radar weekly data refresh** runs every Monday at **09:17 WIB** and can also be started manually:
+
+1. Open the repository's **Actions** tab.
+2. Select **S3 Radar weekly data refresh**.
+3. Choose **Run workflow**.
+4. Open the run and review the collector and validation steps.
+
+The first run publishes data/radar-data.json if the source collectors return usable data. The dashboard's **Reload snapshot** button reloads the latest published JSON; it does not trigger an upstream collection run.
+
+### Optional UN Comtrade API key
+
+The collector supports the repository Actions secret UN_COMTRADE_API_KEY; it also recognizes COMTRADE_API_KEY as a fallback secret name. Add it in **Settings → Secrets and variables → Actions** if an authenticated allowance is available.
+
+Without a key, the collector uses UN Comtrade's public preview endpoint, which is rate-limited and can be truncated. The source status is displayed in the dashboard. The absence of a trade record must not be interpreted as zero trade or no opportunity.
+
+### Local development
+
+Requires Python 3.11+ and Node.js for the dashboard JavaScript syntax check.
+
+    python -m pip install -r requirements.txt
+    python -m unittest discover -s tests -v
+    node --check radar.js
+    python -m http.server 8080
+
+Open http://localhost:8080. For the dashboard to display current data, run python pipeline/collect_radar.py and ensure the resulting snapshot is in data/radar-data.json.
+
+## Repository layout
+
+- index.html — landing page.
+- calculator.html — specialization calculator.
+- radar.html — responsive dashboard shell, theme switch, and translation control.
+- radar.js — map, interactive flow view, filters, source records, charts, and CSV export.
+- pipeline/collect_radar.py — research, country-context, and trade data collector.
+- config/radar_sources.json — topic queries, reporting markets, and collection parameters.
+- data/radar-data.json — published snapshot used by GitHub Pages.
+- tests/ — transformation and dashboard-integration checks.
+- .github/workflows/refresh-radar.yml — weekly/manual collection and snapshot publishing.
+- .github/workflows/ci.yml — unit tests, DOM integration checks, JavaScript syntax checks, and JSON validation.
+
+## Interpretation and limitations
+
+- The research pipeline retrieves bounded results per configured topic and provider; publication-month counts are the returned query results, not a census of global research.
+- The discovery score is an exploratory sorting aid based on metadata such as publication recency, citation counts, and topic matches. It is not a validated impact or investment score.
+- UN Comtrade public preview coverage may be incomplete. Trade-flow edges follow the partner origin declared in an importer's report; they do not establish an individual supplier or physical shipment route.
+- World Bank indicators have their own reporting years and missing values. Missing observations remain unknown, not zero.
+- Respect source terms, API limits, attribution requirements, and the rights of publishers. The collector focuses on API metadata rather than re-publishing full article text.
+
+Project code is distributed under the repository's MIT license. Provider datasets and API content remain subject to their respective terms.
