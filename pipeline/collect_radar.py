@@ -177,15 +177,22 @@ def openalex_record(work: dict[str, Any], topic: dict[str, str]) -> dict[str, An
             if re.fullmatch(r"[A-Z]{2}", code):
                 countries.add(code)
     abstract = reconstruct_abstract(work.get("abstract_inverted_index"))
+    raw_year = work.get("publication_year")
+    try:
+        publication_year = int(raw_year) if raw_year is not None else None
+    except (TypeError, ValueError):
+        publication_year = None
+    if publication_year is not None and not (1800 <= publication_year <= date.today().year + 1):
+        publication_year = None
     pubdate = safe_date(work.get("publication_date")) or (
-        f"{int(work['publication_year']):04d}-01-01" if work.get("publication_year") else None
+        f"{publication_year:04d}-01-01" if publication_year is not None else None
     )
     return {
         "title": title,
         "doi": doi,
         "url": landing,
         "publication_date": pubdate,
-        "year": work.get("publication_year"),
+        "year": int(pubdate[:4]) if pubdate else publication_year,
         "venue": venue,
         "publisher": "",
         "authors": authors,
