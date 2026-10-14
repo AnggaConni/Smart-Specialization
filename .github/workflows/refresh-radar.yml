@@ -5,13 +5,6 @@ on:
   schedule:
     # Weekly on Mondays at 09:17 WIB (02:17 UTC).
     - cron: "17 2 * * 1"
-  push:
-    paths:
-      - "pipeline/**"
-      - "config/radar_sources.json"
-      - "tests/**"
-      - "requirements.txt"
-      - ".github/workflows/refresh-radar.yml"
 
 permissions:
   contents: write
