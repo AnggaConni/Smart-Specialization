@@ -1,0 +1,51 @@
+{
+  "project": "S3 Smart Specialization Radar",
+  "lookback_days": 730,
+  "openalex_per_topic": 15,
+  "crossref_per_topic": 10,
+  "crossref_mailto": "",
+  "markets": [
+    "IDN",
+    "MYS",
+    "SGP",
+    "THA",
+    "VNM",
+    "PHL",
+    "JPN",
+    "KOR"
+  ],
+  "topics": [
+    {
+      "sector": "Regional Innovation",
+      "query": "smart specialisation regional innovation strategy"
+    },
+    {
+      "sector": "Advanced Manufacturing",
+      "query": "artificial intelligence advanced manufacturing industry"
+    },
+    {
+      "sector": "Green Industry",
+      "query": "industrial decarbonisation green manufacturing circular economy"
+    },
+    {
+      "sector": "Agri-food",
+      "query": "agri-food value chains food processing technology"
+    },
+    {
+      "sector": "Trade & Logistics",
+      "query": "digital trade logistics supply chains ports"
+    },
+    {
+      "sector": "Digital Economy",
+      "query": "digital services SME technology adoption"
+    },
+    {
+      "sector": "Culture & Tourism",
+      "query": "cultural tourism creative industries local products"
+    },
+    {
+      "sector": "Skills & Workforce",
+      "query": "future skills workforce transformation regional development"
+    }
+  ]
+}
