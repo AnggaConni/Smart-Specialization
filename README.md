@@ -24,6 +24,8 @@ The Radar uses **English by default**, starts in the **bright theme**, and offer
 
 The collector writes a source-attributed snapshot to **data/radar-data.json**. The page reads this snapshot; it does not run the full collection pipeline from each visitor's browser.
 
+**GDELT rate-limit handling:** the collector uses a dedicated low-volume request policy, bounded retries with exponential backoff and `Retry-After` handling, and stops querying remaining themes after a persistent HTTP 429. Successful topic results are retained; on partial refresh, recent prior news records fill missing themes where possible. The source registry marks partial/rate-limited/stale states instead of silently describing the feed as complete.
+
 ### Policy Support Lab: government and UN use
 
 The **Policy Support Lab** creates a downloadable Markdown evidence brief for a selected country/market, sector focus, intended audience (government, UN Country Team/agency, development partner or regional organisation), planning horizon and user-entered decision question. It assembles the currently available World Bank indicators, relevant S³ research-theme records, reported trade observations and GDELT theme-matched news leads; then adds transparent candidate policy options for appraisal, candidate SDG alignments, monitoring questions and evidence gaps.
